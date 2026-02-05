@@ -578,3 +578,454 @@ The constant method breaks down when you need to pass data (like IDs).
 - If they see `$productIndex`, they have to stop, search your files to find where that variable is defined, and learn your custom system.
 
 ### 3.6 Named Route with parameter
+
+```php
+Route::get("{lang}/product/{id}", function ($lang, $id) {
+    return "{$lang}/product/{$id}";
+}) -> name('product.view');
+
+// now product.view this route have value.
+Route::get('/', function () {
+    $product = route('product.view', [
+        'lang' => 'en',
+        'id' => '123'
+    ]);
+    dd($product);
+    return view('welcome');
+});
+```
+
+**Redirect response:**
+
+```php
+Route::get('/user/profile', function () {
+    // code
+})->name('profile');
+
+Route::get('/current-user', function () {
+    return redirect()->route('profile');
+
+    // or
+    return to_route('profile');
+});
+```
+
+### 3.7 Route Groups
+
+Route group which share same prefix
+
+#### - `Route::prefix()`
+
+```php
+Route::prefix('/admin')->group(function () {
+    Route::get('/users', function () {
+        return '/admin/users';
+    });
+    Route::get('/dashboard', function () {
+        return '/admin/dashboard';
+    });
+});
+```
+
+#### `Route::name()`
+
+```php
+Route::name('.admin')->group(function () {
+    Route::get('/users', function () {
+        return '/users';
+    })->name('users'); // name => 'admin.users'
+});
+```
+
+_Use case:_
+
+```php
+// before
+Route::prefix("/admin")->group(function(){
+    // You have to type 'admin.' every time
+    Route::get("/users", function(){...})->name('admin.users');
+    Route::get("/settings", function(){...})->name('admin.settings');
+    Route::get("/dashboard", function(){...})->name('admin.dashboard');
+});
+
+//after
+Route::prefix("/admin")->name('admin.')->group(function(){
+
+    // Laravel automatically names this: 'admin.users'
+    Route::get("/users", function(){
+        return "User List";
+    })->name('users');
+
+    Route::get("/settings", function(){
+        return "Settings";
+    })->name('settings');
+});
+```
+
+### 3.8 Fallback Routes
+
+```php
+Route::fallback(function () {
+    return "This is fallback route";
+});
+```
+
+### 3.9 View Register Route with Artisan
+
+#### Give all the route list
+
+```bash
+php artisan route:list
+```
+
+#### Show middleware for each route
+
+```bash
+php artisan route:list -v
+```
+
+#### Give all the route define by only dev
+
+```bash
+php artisan route:list --except-vendor
+```
+
+#### Give route only define by laravel
+
+```bash
+php artisan route:list --only-vendor
+```
+
+#### Give route which have certion keyword
+
+```bash
+php artisan route:list --path=keyword
+```
+
+**We can also combine command:**
+
+```bash
+php artisan route:list -v --except-vendor --path=admin
+```
+
+### 3.10 Route Caching
+
+Once you deploy your laravel project in production it is recommended to execute the following command.
+
+```bash
+php artisan route:cache
+```
+
+This will create cached version of Laravel route. This is helpful when project have lot of route, cache will help your application to match the route in a shorter time.
+
+**To disable cache:**
+
+```bash
+php artisan route:clear
+```
+
+---
+
+---
+
+## 4 Controllers
+
+### 4.1 Basic of Controllers
+
+Controller is a class which is associate to one or more routes and it's responsible for handling request of that routes. Generally, controller is a grouping of similar route together. For example product controller should only contain logic related to product but not anything else.
+
+**Make controller file by command:**
+
+```bash
+php artisan make:controller HomeController
+```
+
+File should have `Controller` word at last
+
+`CarController.php`
+
+```php
+class CarController extends Controller
+{
+    public function index()
+    {
+        return "This is car controller";
+    }
+}
+```
+
+`web.php`
+
+```php
+Route::get('/car', [CarController::class, 'index']);
+```
+
+---
+
+### 4.2 Group Routes by Controller
+
+If we have multiple function from same class, instead of reapting the same class, we can group them
+
+```php
+// before
+Route::get('/car', [CarController::class, 'index']);
+Route::get('/buy-car', [CarController::class, 'buy']);
+Route::get('/sell-car', [CarController::class, 'sell']);
+
+//after
+Route::controller(CarController::class)->group(function () {
+    Route::get('/car', 'index');
+    Route::get('/buy-car', 'buy');
+    Route::get('/sell-car', 'sell');
+});
+```
+
+---
+
+### 4.3 Single Action Controller
+
+If your application grows and became very large it is recommended to split it up into multiple other controller, or create single action controller. Single action controllers are controllers that are associated to a single route only.
+
+Create single action controller by command
+
+```bash
+php artisan make:controller [Filename] --invokable
+```
+
+```php
+Route::get('/car', CarController::class);
+```
+
+---
+
+### 4.4 Resource Controllers
+
+In Laravel the 'Resource controller' is a special type of controller that provides a convenient way to handle typical CRUD operations for a resource such as database table.
+
+```bash
+php artisan make:controller [filename] --resource
+```
+
+In resource controller there are 7 predefine methods.
+
+- `index()`: Display a listing of the resource.
+- `create()`: Show the form for creating a new resource.
+- `store()`: Store a newly created resource in storage.
+- `show()`: Display the specified resource.
+- `edit()`: Show the form for editing the specified resource.
+- `update()`: Update the specified resource in storage.
+- `destroy()`: Remove the specified resource from storage.
+
+`create()` and `edit()` are not related to api.
+
+We can create route seperately for the each methods but there is oneliner which can do this thing.
+
+```php
+Route::resource(name: '/product', controller: ProductController::class);
+```
+
+To know which route will do what -
+
+```bash
+php artisan route:list --path=product
+```
+
+Exclude certain methods
+
+```php
+Route::resource(name: '/products', controller: ProductController::class)->except(methods: ['destroy']);
+```
+
+Include certain methods
+
+```php
+Route::resource(name: '/products', controller: ProductController::class)->only(methods: ['index', 'show']);
+```
+
+5 out of them are relevant to api, so you want only those methods will stay do this -
+
+```php
+Route::apiResource(name: '/products', controller: ProductController::class);
+```
+
+Or, when you creating controller only for api do this -
+
+```bash
+php artisan make:controller [filename] --api
+```
+
+If you want to create multiple resource controller
+
+```php
+Route::apiResources(resources: [
+    '/car' => CarController::class,
+    '/products' => ProductController::class
+]);
+```
+
+---
+
+### 4.5 Create Home Controller
+
+```php
+Route::get('/', [HomeController::class, 'index']);
+
+// HomeController.php
+public function index(){
+    return "Index"
+}
+```
+
+---
+
+### 4.6 Create and Render Views
+
+Views are files that are responsible for presentation logic in your Laravel applications and are stored under `resource/views` folder. Typically views are in form of blade file.
+
+**`Blade:`** Blade is Laravel's template engine that helps you to build HTML views efficiently. It allows mixing HTML with PHP using simple and clean syntax.
+
+**Blade Core Feature:**
+
+- `Template Inheritance:` Blade template inheritance enabling you to define a base layout and extend it to other views.
+
+- `Directives:` It provides directive with different purpose for control flow.
+
+- `Components & Slots:` Blade also support reusable component and slots.
+
+All blade views must have extension => `*.blade.php`
+
+Create blade file `index.blade.php` =>
+
+```bash
+php artisan make:view index
+```
+
+```php
+Route::get('/', [HomeController::class, 'index']);
+
+// HomeController.php
+public function index(){
+    return  view('index');
+}
+```
+
+create file > `/views/home/index.blade.php`
+
+```bash
+php artisan make:view home.index
+```
+
+```php
+Route::get('/', [HomeController::class, 'index']);
+
+// HomeController.php
+public function index(){
+    return view('home.index');
+}
+```
+
+---
+
+### 4.7 - Render View using View Facade
+
+To render view there is 2nd method `View`, comming from `Illuminate\Support\Facades\View`.
+
+How to use `View`
+
+```php
+use Illuminate\Support\Facades\View;
+
+class HomeController extends Controller
+{
+    public function index(){
+        return View::make('home.index');
+    }
+}
+```
+
+- **`first()` method:** `first()` method will render the first available view.
+
+```php
+public function index(){
+    return View::first(['index', 'home.index']);
+}
+```
+
+- **`exist()` method:** This method used to verify the existence of a view file before rendering it.
+
+```php
+public function index(){
+    if(View::exists('home.index')){
+        dump("View does't exist");
+    }
+    return View::first(['index', 'home.index']);
+}
+```
+
+When to use which view
+
+- `view('welcome')` is a global "Helper" function. [link](https://dev.to/frankliniwobi/mastering-global-functions-in-laravel-easy-methods-for-versions-891011-4e02)
+
+- `View::make('welcome')` is a "Facade". [text](<https://laravel.com/docs/12.x/views#:~:text=Views%20may%20also%20be%20returned,'%20%3D%3E%20'James'%5D)%3B>)
+
+**1. Clarity in "Non-Standard" Locations**
+Using the global helper `view()` inside a Controller is fine. But if you are writing code in a Service Provider or a utility class, using global functions can look "messy" or magical.
+
+Using the Facade `View::` makes it explicit that your class relies on the View Factory. It allows you to import the class at the top of the file, which follows strict Object-Oriented Programming (OOP) standards.
+
+```php
+// In a ServiceProvider, this looks more professional and explicit:
+use Illuminate\Support\Facades\View;
+
+public function boot()
+{
+    // "I am configuring the View system"
+    View::share('site_name', 'My Awesome App');
+}
+```
+
+**2. Static Methods (The Real Advantage)**
+The Facade provides cleaner access to utility methods that don't involve simply "loading" a page.
+
+When you want to attach logic to a view every time it renders (like always attaching the user's avatar to the Navbar), you must use the Facade.
+
+```php
+// You cannot do this easily with the helper
+View::composer('partials.navbar', function ($view) {
+    $view->with('avatar', Auth::user()->avatar);
+});
+```
+
+| Scenario                     | Recommendation         | Why?                                                                                                            |
+| :--------------------------- | :--------------------- | :-------------------------------------------------------------------------------------------------------------- |
+| **Returning a page**         | `return view('home');` | It's shorter, cleaner, and the standard convention for Controllers.                                             |
+| **Sharing global variables** | `View::share(...)`     | It clearly indicates a configuration setting (often used in `AppServiceProvider`).                              |
+| **Checking existence**       | `View::exists(...)`    | improved readability over `view()->exists(...)`.                                                                |
+| **Service Providers**        | `View::composer(...)`  | Strict typing and imports (`use Illuminate\Support\Facades\View;`) look more professional in class-based files. |
+
+---
+
+### 4.8 Pass Data to Views
+
+There is two ways to pass variable to view
+
+- using `associative array`
+
+```php
+public function index()
+{
+    return view('home.index', ['name' => 'Afrit', 'surname' => 'Bagani']);
+}
+
+// home/index.blade.php
+<h1>My name is {{ $name }} {{ $surname }}</h1>
+```
+
+- using `with()` method:
+
+```php
+public function index()
+{
+    return view('home.index')->with('name', 'Afrit')->with('surname', 'Bagani');
+}
+```
