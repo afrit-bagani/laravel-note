@@ -37,7 +37,7 @@ herd is a single program which combine `php`, `nginix`, `node`, `composer`
 
 **Extension:**
 
-laravel blade, laaravel blade snippet, laraval goto
+laravel blade, laravel blade snippet, laraval goto
 
 ---
 
@@ -865,7 +865,11 @@ Route::apiResources(resources: [
 
 ---
 
-### 4.5 Create Home Controller
+## 5. Views - The Basics
+
+---
+
+### 5.1 Create Home Controller
 
 ```php
 Route::get('/', [HomeController::class, 'index']);
@@ -878,7 +882,7 @@ public function index(){
 
 ---
 
-### 4.6 Create and Render Views
+### 5.2 Create and Render Views
 
 Views are files that are responsible for presentation logic in your Laravel applications and are stored under `resource/views` folder. Typically views are in form of blade file.
 
@@ -926,7 +930,7 @@ public function index(){
 
 ---
 
-### 4.7 - Render View using View Facade
+### 5.3 - Render View using View Facade
 
 To render view there is 2nd method `View`, comming from `Illuminate\Support\Facades\View`.
 
@@ -964,9 +968,9 @@ public function index(){
 
 When to use which view
 
-- `view('welcome')` is a global "Helper" function. [link](https://dev.to/frankliniwobi/mastering-global-functions-in-laravel-easy-methods-for-versions-891011-4e02)
+- `view('welcome')` is a global "Helper" function. [🔗](https://dev.to/frankliniwobi/mastering-global-functions-in-laravel-easy-methods-for-versions-891011-4e02)
 
-- `View::make('welcome')` is a "Facade". [text](<https://laravel.com/docs/12.x/views#:~:text=Views%20may%20also%20be%20returned,'%20%3D%3E%20'James'%5D)%3B>)
+- `View::make('welcome')` is a "Facade". [🔗](<https://laravel.com/docs/12.x/views#:~:text=Views%20may%20also%20be%20returned,'%20%3D%3E%20'James'%5D)%3B>)
 
 **1. Clarity in "Non-Standard" Locations**
 Using the global helper `view()` inside a Controller is fine. But if you are writing code in a Service Provider or a utility class, using global functions can look "messy" or magical.
@@ -1005,7 +1009,7 @@ View::composer('partials.navbar', function ($view) {
 
 ---
 
-### 4.8 Pass Data to Views
+### 5.4 Pass Data to Views
 
 There is two ways to pass variable to view
 
@@ -1028,4 +1032,668 @@ public function index()
 {
     return view('home.index')->with('name', 'Afrit')->with('surname', 'Bagani');
 }
+```
+
+---
+
+### 5.5 Share Data Between all Views
+
+It is also possiable to declare a global share data, that data will available to all blade file.
+
+`app/Proviers/AppServiceProvider.php`
+
+```php
+public function boot(): void
+    {
+        View::share('year', date('Y'));
+    }
+```
+
+`index.blade.php`
+
+```php
+<h1>Year: {{$year}}</h1>
+```
+
+---
+
+## 6. View - Displaying Data
+
+---
+
+### 6.1 Using Functions in Blade Files
+
+```php
+<p>{{date('Y')}}</p>
+<p>{{strtoupper($name . ' ' . $surname)}}</p>
+<p>{{Illuminate\Support\Str::after("Hello World", 'Hello ')}}</p>
+<p>{{Illuminate\Foundation\Application::VERSION}}</p>
+```
+
+---
+
+### 6.2 Display Unescaped Data
+
+```php
+public function welcome(){
+    return view('hello.welcome', [
+        'name' => 'Afrit',
+        'surname' => 'Bagani',
+        'job' => '<b>Developer</b>'  // It will render as '<b>Developer</b>'
+    ]);
+}
+```
+
+When ever we output variable inside blade they are esacped.
+
+```php
+// Not this => <p>{{ $job }}</p>
+<p>{!! $job !!}</p>
+```
+
+### 6.3 Blade and JavaScript Frameworks
+
+```php
+{{ $name }} // laravel will process this expression
+@{{  name }} // tell laravel not to process this following expression, // output => {{ name }}
+
+@foreach() // when laravel see `@`, it means it want to iterate
+```
+
+```php
+// suppose there is multiple vairiable
+<div>
+    @name: {{ $name }}
+    @age: {{ $age }}
+    @job: {{ $job }}
+</div>
+
+//After
+
+@verbatim
+
+<div>
+    name: {{ $name }}  <br>
+    age: {{ $age }} <br>
+    job: {{ $job }} <br>
+</div>
+@endverbatim
+
+```
+
+When there is someting between `@verbatim ... @endverbatim`, laravel will not process this.
+
+### 6.4 Rendering JSON
+
+```php
+public function welcome()
+{
+    return view('hello.welcome', [
+        'name' => 'Afrit',
+        'surname' => 'Bagani',
+        'job' => '<b>Developer</b>',
+        'hobbies' => ['reading', 'writing']
+    ]);
+}
+// hobbies is a string and want to parse it
+
+//welcome.blade.php
+<script>
+    const hobbies = {{ \Illuminate\Support\Js::from($hobbies) }}
+</script>
+```
+
+---
+
+## 7. Views - Blade Directives
+
+---
+
+### 7.1 What are Blade Directives
+
+Blade directives are special keywords which are prefixed with `@` symbol used in laravel's templating engine to simplify common tasks.
+
+- `Template Inheritance`
+- `Conditional Rendering`
+- `Lopping Through Data`
+
+They convert this shorthand notation into plain PHP code enhancing readability and maintainability of the code.
+
+Eaxmple: if for condition
+foreach for loops
+
+extens for layout inheritance
+
+Core Feature of Directives
+
+- Streamline template creation
+- Reduce boilerplate code
+
+### 7.2 Blade Comments
+
+```php
+// HTML Comment
+<!--
+some text
+-->
+
+// Blade comment
+{{-- Single line comment --}}
+
+{{--
+Multi
+line
+comment
+--}}
+```
+
+HTML comment is visiable to page source, but blade comment does't
+
+---
+
+### 7.3 Conditional Directive
+
+- **`@if()`:**
+
+```php
+@if(true)
+    <p>This will be displayed</p>
+@endif
+
+// if else
+@if (condition)
+    <p>This will print</p>
+@else
+    <p>else this will print</p>
+@endif
+
+```
+
+- **`@unless():`**
+
+```php
+@unless (false)
+    <p>Unless</p>
+@endunless
+
+{{-- is same as --}}
+
+@if(true)
+    <p>Print it</p>
+@endif
+```
+
+- **`@isset():`** It check a variable exist or not
+
+```php
+@isset($car)
+    <p>isset</p>
+@endisset
+```
+
+- **`@empty():`** Check a variable empty or not
+
+```php
+@empty($car)
+    <p>Empty</p>
+@endempty
+```
+
+- **`@auth`**:
+
+```php
+@auth
+    <p>User is authenticated</p>
+@endauth
+```
+
+- **`@guest`**: opposite of auth
+
+```php
+@guest
+    <p>User is guest</p>
+@endguest
+```
+
+---
+
+### 7.4 Switch Directives
+
+```php
+@switch($variable)
+    @case('match')
+        <p>This is match</p>
+        @break
+
+    @default
+        <p>This is not macth</p>
+
+@endswitch
+```
+
+### 7.5 Loop Directive
+
+- **`@for()`**:
+
+```php
+@for($i = 0; $i < 10; $i++)
+    <p>{{ $i + 1 }}</p>
+@endfor
+```
+
+- **`@foreach()`**:
+
+```php
+@foreach ($cars as $car)
+    <p>Model: {{ $car->model }}</p>
+@endforeach
+```
+
+- **`@forelse()`**:
+
+```php
+@forelse ($cars as $car)
+    <p>Model: {{ $car->model }}</p>
+@empty
+    <p>There are no cars</p>
+@endforelse
+```
+
+- **`@while()`**:
+
+```php
+@while(false)
+
+@endwhile
+```
+
+### 7.6 Continue and Break in Loop
+
+- **`@continue`**
+
+```php
+@foreach ([1, 2, 3, 4, 5] as $n)
+    @if($n == 2)
+        @continue
+    @endif
+    <p>{{ $n }}</p>
+@endforeach
+
+// better way
+@foreach ([1, 2, 3, 4, 5] as $n)
+    @continue($n == 2)
+    <p>{{ $n }}</p>
+@endforeach
+```
+
+- **`@break`**
+
+```php
+@foreach ([1, 2, 3, 4, 5] as $n)
+    @if($n == 2)
+        @break
+    @endif
+    <p>{{ $n }}</p>
+@endforeach
+
+// short hand
+@foreach ([1, 2, 3, 4, 5] as $n)
+    @break($n == 2)
+    <p>{{ $n }}</p>
+@endforeach
+```
+
+---
+
+### 7.7 Loop Variable
+
+Whenever you use a `@foreach` loop in Blade, Laravel automatically injects a special variable called `$loop` that gives you superpowers over the current iteration.
+
+```php
+@foreach ($hobbies as $h)
+    {{ dd($loop) }}
+    <p>{{ $h }}</p>
+@endforeach
+```
+
+loop variable is a object, it has some keys.
+
+| Property               | Description                                                          |
+| ---------------------- | -------------------------------------------------------------------- |
+| **`$loop->index`**     | The index of the current loop iteration (starts at **0**).           |
+| **`$loop->iteration`** | The current loop iteration (starts at **1**).                        |
+| **`$loop->remaining`** | The number of iterations remaining in the loop.                      |
+| **`$loop->count`**     | The total number of items in the array being iterated.               |
+| **`$loop->first`**     | Returns `true` if this is the **first** iteration through the loop.  |
+| **`$loop->last`**      | Returns `true` if this is the **last** iteration through the loop.   |
+| **`$loop->even`**      | Returns `true` if this is an **even** iteration (2nd, 4th, etc.).    |
+| **`$loop->odd`**       | Returns `true` if this is an **odd** iteration (1st, 3rd, etc.).     |
+| **`$loop->depth`**     | The nesting level of the current loop.                               |
+| **`$loop->parent`**    | When in a nested loop, creates access to the parent's loop variable. |
+
+---
+
+### 7.8 Class & Style Directive
+
+```php
+<div @class([
+    'class',
+    'india' => $country === 'in',
+    ])
+    @style([
+        'color: green'
+    ])
+>This is sample text
+</div>
+```
+
+### 7.9 Including Sub Views
+
+`welcome.blade.php`
+
+```php
+@include('shared.button', [
+    'color' => 'blue',
+    'text' => 'submit'
+])
+```
+
+`shared/button.blade.php`
+
+```php
+//you have to give shared file path
+
+<button
+@style([
+    'background-color: ' . $color
+])
+>{{ $text }}</button>
+```
+
+### 7.10 Conditionally Rendering Sub Views
+
+If you provide a directive, but that is not exist, it will throw an error. So you can do => if exist then only render.
+
+```php
+@includeIf('shared.search_form', [
+    'year' => 2019
+])
+```
+
+```php
+@includeWhen($searchKeyword, 'shared.search_result', [
+    'year' => 2019
+])
+```
+
+`@incldeUnless` => Oppsite of `@includeWhen()`
+
+Only work if first param become false
+
+```php
+@includeUnless(!$searchKeyword, 'shared.search_result', [
+    'year' => 2019
+])
+```
+
+`@includefirst`: Render the first available view
+
+```php
+@includeFirst(['admin.button', 'button'], ['color' => 'red'])
+```
+
+### 7.11 Sub Views Inside Loop
+
+Render differnt view for each variable
+
+```php
+@foreach ($cars as $car)
+    @include('car.view', [
+        'car' => $car,
+    ])
+@endforeach
+
+{{--
+----------------------
+Shorthand => using @each
+----------------------
+--}}
+
+@each('car.view', $cars, 'car', 'car.empty')
+```
+
+### 7.12 Use raw PHP in blade
+
+```php
+<?php
+// php code
+
+use Illuminate\Support\Str;
+?>
+
+{{-- Same --}}
+
+@php
+    @use('Illuminate\Support\Str')
+    // PHP code
+@endphp
+```
+
+---
+
+## 8 Website Layout with Template Inheritance
+
+---
+
+### 8.1 Create Website Layout
+
+Laravel uses a system called **Template Inheritance**. You define a "Parent" (the layout) and "Children" (the pages).
+
+**1. The Parent (The Skeleton):**
+Usually saved as `resources/views/layout/app.blade.php`. This file contains the HTML structure and a special "Hole" where the child content will be injected. We mark this hole with `@yield`.
+
+```php
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>@yield('title')</title>
+</head>
+
+<body>
+    <header>This is header</header>
+    @yield('content')
+    <footer>This is footer</footer>
+</body>
+
+</html>
+```
+
+**2. The Child (The Page):**
+
+Saved as `resources/views/home/index.blade.php`. This file doesn't need <`html>` or `<body>` tags. It just says "Use the `app` layout, and put this content into the `content` hole."
+
+```php
+@extends('layouts.app')
+
+@section('title', 'Home')
+
+@section('content')
+    <h1>This is the content that extend basic app layouts</h1>
+@endsection
+```
+
+**The 3 Keywords You Must Know:**
+
+To pass an interview, you need to know these three directives:
+
+1. `@yield('name')`: Used in the Layout. It defines a placeholder (a hole) where content will be injected.
+
+2. `@extends('layout_name')`: Used in the Child View. It tells Laravel "This page uses that layout file."
+
+3. `@section('name') ... @endsection`: Used in the Child View. It defines the actual content that gets injected into the @yield hole of the same name.
+
+#### `@stack` and `@push`
+
+Imagine your website has a heavy "Calendar" library (like `datepicker.js`).
+
+- **The Beginner Way:** Put `<script src="datepicker.js"></script>` in the main layout. Now every page loads it, even the "About Us" page which doesn't need it. This slows down your site.
+
+- **The Pro Way:** Use Stacks. You create a "slot" in the layout, but you only fill it from the specific pages that actually need that script.
+
+Here is how to set up Multiple Holes using `@stack` and `@push`.
+
+**Step 1: Prepare the Layout (The "Stack")**
+In your main layout file, instead of putting the script tag directly, you put a placeholder called `@stack`.
+
+You usually put this at the very bottom of the `<body>` so scripts load last (for speed).
+
+```php
+<html>
+<body>
+    <nav>...</nav>
+
+    <div class="container">
+        @yield('content')
+    </div>
+
+    <script src="jquery.js"></script>
+    <script src="bootstrap.js"></script>
+
+    @stack('scripts')
+
+</body>
+</html>
+```
+
+**Step 2: Push from the Child (The "Injection")**
+Now, let's say you have a Contact Page that needs a Google Maps script. You open `contact.blade.php` and "push" that script into the stack.
+
+```php
+@extends('layout.app')
+
+@section('content')
+    <h1>Contact Us</h1>
+    <div id="map"></div>
+@endsection
+
+@push('scripts')
+    <script src="https://maps.googleapis.com/maps/api/js"></script>
+    <script>
+        console.log("Map loaded!");
+    </script>
+@endpush
+```
+
+**Step 3: What happens on other pages?**
+If you open your Home Page (`home.blade.php`) and you don't write `@push('scripts')`... nothing happens. The `@stack('scripts')` in the layout remains empty.
+
+### 8.2 Output Variable in Layout
+
+`<html lang="en">` If is want this will be dynamic based on language
+
+```php
+<html lang="{{ app() -> getLocale() }}">
+<html lang="{{ str_replace('_', '-', app() -> getLocale() }}">
+<meta name="csrf-token" content="{{ csrf_token() }}"/>
+<title>@yield('title') | {{ config('app.name') }}</title>
+```
+
+### 8.4 Create Parent Layout
+
+`layouts/clean.blade.php`
+
+```php
+<html>
+    <body>
+        @yield('childContent')
+    </body>
+</html>
+```
+
+`layouts/app.blade.php`
+
+```php
+@extend('layouts.clean')
+@include('layouts.partials.header')
+
+@section('childContent')
+    @yield('content')
+@endsection
+
+@include('layouts.partials.footer')
+```
+
+`home/index.blade.php`
+
+```php
+@extend('layouts.app')
+
+@section('content')
+    // write html code
+@endsection
+```
+
+### 8.5 Create Signup Page
+
+`web.php`
+
+```php
+Route::get('/signup', [SignupController::class, 'create']);
+```
+
+`SignupController.php`
+
+```php
+class SignupController extends Controller
+{
+    public function create()
+    {
+        return view('auth.signup');
+    }
+}
+```
+
+**Add Custom class to specific view:**
+
+`views/auth/signup.blade.php`
+
+```php
+@extends('layouts.clean', ['cssClass' => 'your-custome-class-for-login-page'])
+
+@section('title', 'Signup')
+
+@section('childContent')
+
+// Signup HTML code
+
+@endsection
+```
+
+`layouts.clean`
+
+```php
+<body class="{{ $cssClass }}">
+    // code
+</body>
+
+<!--
+-------------------
+Safer
+-------------------
+ -->
+
+<body class="@isset($cssClass) {{ $cssClass }} @endisset">
+    // code
+</body>
+
+// if class is not present is will have 'class' keyword, we can improve this
+
+<body @isset($cssClass)class="{{ $cssClass }}" @endisset>
+    // code
+</body>
+
 ```
