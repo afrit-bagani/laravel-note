@@ -1695,5 +1695,389 @@ Safer
 <body @isset($cssClass)class="{{ $cssClass }}" @endisset>
     // code
 </body>
-
 ```
+
+### 8.6 Directives - `@section`, `@show`, `@parent`
+
+If I want some value will be default, and in some case want to ovearide.
+
+`layouts/app.blade.php`
+
+```php
+@extends('layouts.clean')
+
+@section('childContent')
+    @yield('content')
+    <footer>
+        @section('footerLinks')
+            <a href="#">Link 1</a>
+            <a href="#">Link 2</a>
+        @endsection
+    </footer>
+    @yield('footerLinks')  // when I give value, it will override
+@endsection
+```
+
+`views/home/index.blade.php`
+
+```php
+@extends('layouts.app')
+```
+
+**Override example:**
+
+```php
+@section('footerLinks')
+  <a href="#">Link 3</a>
+  <a href="#">Link 4</a>
+@endsection
+```
+
+**Simpler (Shorthand):**
+
+`layouts/app.blade.php`
+
+```php
+@extends('layouts.clean')
+
+@section('childContent')
+    @yield('content')
+    @section('footerLinks')
+        <a href="#">Link 1</a>
+        <a href="#">Link 2</a>
+    @show
+@endsection
+```
+
+**If want to use both value:**
+
+`view/home/index.blade.php`
+
+```php
+@extends('layouts.app')
+
+@section('footerLinks')
+  @parent
+  <a href="#">Link 3</a>
+  <a href="#">Link 4</a>
+@endsection
+```
+
+### 8.7 More on Directives
+
+- `@hasSection...@endif`: Checks a specific directive define or not.
+
+```php
+<Footer>
+    @yield('footerLinks') // if footer is not used by its child it will be empty, but footer will be visible with no node.
+</Footer>
+
+// if footer is empty, it will not be visiable
+@hasSection('footerLinks')
+    <footer>
+        @yield('footerLinks')
+    </footer>
+@endif
+```
+
+- `@sectionMissing()`: Checks a specific section is missing or not.
+
+If `navigation` section does not exist it render the default navigation
+
+```php
+@sectionMissing('navigation')
+    <div class="pull-right">
+        @include('default-naviation')
+    </div>
+@endif
+```
+
+- `@checked`: We can add check attribute
+
+```php
+<input type="checkbox" @checked(BOOLEAN_EXPRESSION) />
+```
+
+- `@disabled`
+
+```php
+<input type="checkbox" @disabled(BOOLEAN_EXPRESSION) />
+```
+
+- `@required`
+
+```php
+<input type="checkbox" @readonly(BOOLEAN_EXPRESSION) />
+```
+
+- `@required`
+
+```php
+<input type="checkbox" @required(BOOLEAN_EXPRESSION) />
+```
+
+- `@selected`
+
+```php
+<select name="year">
+    @foreach($years as $year)
+    <option value="{{ $year }}"  @selected($year == date('Y'))>
+       {{ $year }}
+    </option>
+</select>
+```
+
+## 9. Components
+
+### 9.1 Introduction to Components
+
+In Laravel components are reusable piece of UI that can be included in your blade views. Components encapsulate HTML markup, style and logic into a single unit, making it easier to manage and reuse code. Component can accept the data as attribute and include slots for more flexible content insertion.
+
+**Types of components:**
+
+- Class Based Components
+- Anonymous Components
+
+`views/components/card.blade.php`
+
+```php
+//HTML Code
+```
+
+How to use components
+
+```php
+<x-card/> //always starting with 'x-'
+```
+
+If components is in nested folder
+
+`components/admin/card.blade.php`
+
+```php
+<x-admin.card>
+```
+
+create component using command
+
+```bash
+php artisan make:component Card --view
+```
+
+### 9.2 Component Slots
+
+Customizing content every time when rendering it, that is possiable through componet slot. A component slot is a placeholder where you can insert custom content when you see the component.
+It allows you to pass different pieces of content into a predefined sections of our component making the component flexible and reusable.
+
+**Types of Slots:** - `Default slots` and `Named slots`
+
+`Default Slot`:
+
+```php
+`components/card.blade.php`
+
+<div class="card">
+    {{ $slot }}
+</div>
+
+// using slot => home.php
+<x-card>
+    Custom content 1
+</x-card>
+<x-card>
+    Custom content 2
+</x-card>
+```
+
+There can be only one default slot and multiple name slot.
+
+`Named slot`:
+
+```php
+`card.blade.php`
+
+<div>
+  <div class="card-header">{{ $title }}</div>
+  {{ $slot }}
+  <div class="card-footer">{{ $footer }}</div>
+</div>
+
+`home.blade.php`
+
+<x-card>
+  <x-slot name="title">Card title 1</x-slot>
+  Custom content 1
+  <x-slot name="footer">Card footer 1</x-slot>
+</x-card>
+
+//short ahnd
+<x-card>
+  <x-slot:title>Card title 1</x-slot>
+  Custom content 1
+  <x-slot:footer>Card footer 1</x-slot>
+</x-card>
+```
+
+**To check `default slot` is empty or not:**
+
+```php
+<div>
+  <div class="card-header">{{ $title }}</div>
+  @if (@$slot->isEmpty())
+    <p>Please provide some content</p>
+  @else
+    {{ $slot }}
+  @endif
+  <div class="card-footer">{{ $footer }}</div>
+</div>
+```
+
+### 9.3 Class Based Components
+
+Class based componet naming convention: Pascal Case => `MyVariableName`
+
+```bash
+php artisan make:component SearchForm
+```
+
+Component is created under `app/View/Components`
+
+Class based components give you possibility to override the default location of the blade file by changing the following part:
+
+```php
+public function render(): View|Closure|string
+    {
+        return view('components.search-form');  //right here
+    }
+```
+
+If you have very complex logic of selecting data that you want to render in your component you can put that into `__construct()` function.
+
+```php
+public function __construct()
+    {
+        // here
+    }
+```
+
+You can define your own public function, and use it in the view:
+
+```php
+`SearchForm.php`
+public function test()
+    {
+        return "Something";
+    }
+
+`component/serch-form.php`
+
+<div>
+    {{ $test() }}
+</div>
+
+`home/index.blade.php`
+<x-card>
+  <x-slot name="title">Card title 1</x-slot>
+  Custom content 1
+  <x-slot name="footer">Card footer 1</x-slot>
+  <x-search-form />
+</x-card>
+```
+
+### 9.4 Class Based Components Attributes
+
+```php
+`SearchForm.php`
+public function __construct(public string $action, public string $method)
+    {
+        //
+    }
+
+`index.blade.php`
+// need attribute in components
+<x-search-form action="/search" method="GET"/>
+
+`search-form.blade.php`
+
+<form action="{{ $action }}" method="{{ $method }}">
+// code
+</form>
+```
+
+Any global variable, methods in class component directly available in associate blade file.
+
+**Can provide default value to param also:**
+
+```php
+public function __construct(
+    public string $action = '/search',
+    public string $method = 'GET'
+){
+// code
+}
+```
+
+### 9.5 Anonymous Component Attributes
+
+```php
+<x-card color="red"/>
+
+// card.blade.php
+<div>{{ $color }}</div>
+```
+
+There exist spefic attribute for propertise of Anonymous components:
+
+```php
+@props(['color', 'bgColor']) // camel naming or - kabab naming
+<div>
+
+</div>
+```
+
+advantge => can provide default values, @props() give idea what are all the props.
+
+use variable
+
+```php
+@php
+    $color = 'red';
+    $bgColo = 'blue';
+@endphp
+<x-card color="$color" bgColor="$bgColor">...</x-card> // it is hard code variable
+<x-card :color="$color" :bgColor="$bgColor">...</x-card> // now it is variable
+<x-card :$color :$bgColor>...</x-card> // short hansd
+```
+
+### 9.6 Additional Attributes on Components (watch next)
+
+`$attributes()`: give info about the attribute and it `exclude` all those props that are define by `@props`
+
+`{{ dump($attributes) }}`
+
+### 9.7 Component Slot Attributes
+
+### 9.10 Reserved Keywords in Components
+
+```php
+/* Do not use these public properties or methods.
+* - data
+* - render
+* - resolveView
+* - shouldRender
+* - view
+* - withAttributes
+* - withName
+
+*/
+```
+
+### 9.11 Inline Components
+
+Inline component is a component which does not have its associate blade file and the HTML content is returned from the component's class render() method directly.
+
+```bash
+php artisan make:component TestComponent --inline
+```
+
+### 9.12 Layouts using Components
