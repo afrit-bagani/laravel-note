@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('password');
             $table->string('google_id', 45)->nullable();
             $table->string('facebook_id', 45)->nullable();
-            $table->rememberToken();
-            $table->timestamps();
+            $table->rememberToken()->nullable();
+            $table->nullableTimestamps();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

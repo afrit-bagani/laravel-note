@@ -2397,14 +2397,15 @@ To know information about a model
 php artisan model:show <model-name>
 ```
 
-By default laravel create table name in snake_case with plural form. FuelType -> fuel_types.  
-But we can always give cutome name to table:
+### 12.3 Eloquent Model Conventions
+
+By default laravel create table name in `snake_case` with `plural form`.  
+FuelType => fuel_types.  
+But we can always give cutom name to table:
 
 ```php
 protected $table = 'car_fuel_types'
 ```
-
-### 12.3 Eloquent Model Conventions
 
 By default laravel assume that your primary key will be `id`, but if you want to cutomise it:
 
@@ -2422,3 +2423,88 @@ class FuelType extends Model {
     public $incrementing = false;
 }
 ```
+
+**If you want to change primiary key type from int to string:**
+
+```php
+protected $keyType = 'string';
+```
+
+**Disable timestamp:**
+
+```php
+public $timestamps = false;
+```
+
+**Customise created_at and updated_at:**
+
+```php
+const CREATED_AT = 'created_date';
+const UPDATED_AT = 'updated_date';
+```
+
+---
+
+### 12.4 Generate Renaming ORM Models
+
+```php
+// BEFORE
+use Illuminate\Database\Eloquent\Model;
+
+class Model extends Model
+{
+    // code
+}
+
+//AFTER
+use Illuminate\Database\Eloquent\Model as EloquentModel;
+
+class Model extends EloquentModel
+{
+    // code
+}
+```
+
+**When you have `deleted_at` attribute add `SoftDeletes`**
+
+```php
+class Car extends Model
+{
+    use HasFactory, SoftDeletes;
+}
+```
+
+---
+
+### 12.5 Route Model Binding
+
+```php
+Class CarController extends Controller {
+    // BEFORE
+    public function show(string $id)
+    {
+        return view('car.show');
+    }
+
+    //AFTER
+    // it expect car instance
+    public function show(Car $car) // Binding controller with model
+    {
+        return view('car.show');
+    }
+}
+
+// PROVIDING DATA
+
+// BEFORE
+<a href="{{ route('car.show', 1) }}">
+    <img src="/img/cars/Lexus-RX200t-2016/1.jpeg" alt="" class="car-item-img rounded-t" />
+</a>
+
+//AFTER
+<a href="{{ route('car.show', $car) }}">
+    <img src="/img/cars/Lexus-RX200t-2016/1.jpeg" alt="" class="car-item-img rounded-t" />
+</a>
+```
+
+### 12.6 Select Data using Eloquent - The Basic
