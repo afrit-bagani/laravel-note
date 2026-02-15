@@ -292,7 +292,7 @@ Route::get("/about", function () {
 
 ### 2.4 Request Life Cycle
 
-![laraval-request-life-cycle-image](laraval-request-life-cycle.png)
+![laraval-request-life-cycle-image](./Notes/laravel-request-life-cycle.png)
 
 ---
 
@@ -821,6 +821,11 @@ In resource controller there are 7 predefine methods.
 We can create route seperately for the each methods but there is oneliner which can do this thing.
 
 ```php
+Route::resource(name: '/product', controller: ProductController::class);
+
+// If I have another method I have to define the route above that
+Route::get(name: '/product/buy', [controller: ProductController::class, 'buy'])
+  -> name('product.buy');
 Route::resource(name: '/product', controller: ProductController::class);
 ```
 
@@ -2081,3 +2086,339 @@ php artisan make:component TestComponent --inline
 ```
 
 ### 9.12 Layouts using Components
+
+Before
+
+```php
+`layouts/clean.blade.php`
+
+// HTML base code
+
+@yield('childContent')
+
+`layouts/app.blade.php`
+
+@extends('layout.clean')
+@include('layouts/partials/header.blade.php')
+
+@section('childContent')
+@yield('content')
+// HTML code
+@endsection
+
+`home/index.blade.php`
+
+@extends(layout.app)
+
+@section('content')
+// HTML code
+@endsection
+```
+
+**After:** Replacing with component
+
+```php
+`BaseLayout.php`
+
+public function render(): View|Closure|string
+    {
+        return view('layouts.base'); // replacing 'components.base-layout'
+    }
+
+`AppLayout.php`
+
+public function render(): View|Closure|string
+    {
+        return view('layouts.app'); // replacing 'components.app-layout'
+    }
+
+`layouts/base.blade.php`
+
+@props(['bodyClass' => '', 'title' => ''])
+
+//HTML code
+<title>{{ $title }}</title>
+<body @if(bodyClass)class="{{ $bodyClass }}@endif">
+{{ $slot }} // replacing @yield('childContent)
+
+`auth/login.blade.php`
+
+<x-base-layout title="Login Page"> // using attribute
+    // Code
+</x-base-layout>
+
+
+`layouts/app.blade.php`
+
+@props(['title' => '', 'bodyClass' => ''])
+
+<x-base-layout :$title :$bodyClass>
+    {{ $slot }}
+    // HTML code
+</x-base-layout>
+
+`home/index.blade.php`
+
+<x-app-layout title="Home Page">
+    // HTML code
+</x-app-layout>
+```
+
+```php
+// Before
+
+// layouts/app.blade.php
+<footer>
+    @section('footerLinks')
+        <a href='#'> Link 1</a>
+        <a href='#'> Link 2</a>
+    @show
+</footer>
+
+// index.blade.php
+@section('footerLinks')
+    @parent
+    <a href='#'> Link 3</a>
+    <a href='#'> Link 4</a>
+@show
+
+// After
+<footer>
+    {{ $footerLinks }}
+    <a href='#'> Link 1</a>
+    <a href='#'> Link 2</a>
+</footer>
+
+<x-slot:footerLinks>
+    <a href='#'> Link 3</a>
+    <a href='#'> Link 4</a>
+</x-slot:footerLinks>
+```
+
+**Transforming header partials to component:**
+
+_Two options_: Which to use?
+
+- `Class Component` => `app/View/Components/Header.php`
+- `Anonymous Component` => `resources/views/components/layout/header.blade.php`
+
+Go with option 2: Anonymous Components give you the best of both worlds:
+
+In the past (Laravel 6 and earlier), we used Partials (`@include('partials.header')`). Then came Class Components (`app/View/Components/...`), which required two files: a PHP class and a Blade view.
+
+_When should you use a Class-based Component?_
+You should only do this if your Header needs to fetch its own data.
+
+The Scenario: Imagine your header shows a "Notifications (5)" badge.
+
+Anonymous Component: You must pass `$notifications` from every single Controller in your app to the view. This is annoying and repetitive.
+
+Class Component: The Class itself can run the query `User::find(1)->notifications` inside its `render()` method.
+
+**Gist:**
+
+- Is it just HTML/CSS (UI)? -> Anonymous Component (Folder).
+
+- Does it need to query the database independently? -> Class Component.
+
+```php
+`app.blade.php`
+
+// Before
+<x-base-layout>
+    @include('layouts.partials.header')
+    {{ $slot }}
+    <footer>
+
+    </footer>
+</x-base-layout>
+
+// After
+<x-base-layout>
+    <x-layouts.header />
+    {{ $slot }}
+    <footer>
+
+    </footer>
+</x-base-layout>
+```
+
+**Question:** If a create resource route => `Route::resource()` and it have 7 methods by default and want another method, why I have to define that particulae route above resource route ?
+
+Answer => Laravel reads routes from Top to Bottom, and the "First Match Wins."
+
+**1. The "Wildcard" Trap**
+When you declare a resource route:
+
+```PHP
+Route::resource('photos', PhotoController::class);
+```
+
+Laravel automatically creates a route for the `show` method that looks like this:
+
+- URL: `/photos/{photo}`
+- Meaning: "Anything you type after `/photos/` is an ID."
+
+If you define your custom route below it:
+
+```PHP
+// 1. Resource is defined first
+Route::resource('photos', PhotoController::class);
+
+// 2. Custom route defined second
+Route::get('/photos/popular', [PhotoController::class, 'popular']);
+```
+
+**2. What Happens When You Visit `/photos/popular`?** 1. Laravel starts at the top of the file. 2. It sees the resource route `GET /photos/{photo}`. 3. It compares your URL `/photos/popular` to that pattern. 4. It thinks: "Aha! `{photo}` is a wildcard. The user is asking for the photo with the ID 'popular'." 5. MATCH FOUND. It stops looking. 6. It sends the request to the `show()` method with `$id = "popular"`.
+
+Your custom route is never reached because the resource route "swallowed" the request first.
+
+**3. The Fix: Specific Before Generic**
+To fix this, you must place specific routes (hardcoded paths like `/popular`) before generic wildcard routes (dynamic paths like `/{id}`).
+
+```PHP
+// CORRECT ORDER
+
+// 1. Specific: Check if the user wants exactly "popular"
+Route::get('/photos/popular', [PhotoController::class, 'popular']);
+
+// 2. Generic: If not "popular", assume it's an ID
+Route::resource('photos', PhotoController::class);
+```
+
+```php
+<form action="{{ route('car.search') }}">
+```
+
+## 10. Introductions to DataBase
+
+### 10.1 Database Coonfiguration
+
+`.env`
+
+```txt
+DATABASE_URL=driver://username:password@host:port/database
+```
+
+### 10.2 Explore Default Database
+
+### 10.3 Explore Project's Database Schema
+
+## 11. Migration
+
+### 11.1 What are Migrations ?
+
+**Laravel Migration:**
+
+- Manage and version control
+- Versioned Blueprint
+- Define Structure(colimn and data types)
+- Create, modify, share chanbes with your team
+- Consistent Database structure
+- Rollback changes when something goes break
+
+### 11.2 Migration File Structure
+
+time_descrtieve name, file under migrations ensure that migration run in correct order.
+
+Every migration file has two methods (up and down).  
+`up()`: methods define the changesc, which will applied to database such as creating and modifing table. The methods uses laravel schema builder to define the schema changes such as creating table.
+
+`down():` down method revert the changes made in up method providing a way to rollback the migration. This method undo the changes like dropping the table.
+
+### 11.3 Migrate Artisan Command
+
+```bash
+php artisan list migrate
+```
+
+```text
+migrate:fresh     Drop all tables and re-run all migrations
+migrate:install   Create the migration repository
+migrate:refresh   Reset and re-run all migrations // Rolling back migration and running that migration in reverse order
+migrate:reset     Rollback all database migrations
+migrate:rollback  Rollback the last database migration
+migrate:status    Show the status of each migration
+```
+
+`fresh` use up method, but `refresh` use down method
+
+### 11.3 Create migration file
+
+**Create table:**
+
+Convention: create\_<your_table_name>\_table
+
+```bash
+php artisan make:migration create_car_types_table
+```
+
+### 11.4 Running Migration
+
+It run the migration and show the sql command
+
+```bash
+php artisan migrate --pretend
+```
+
+## 12 Eloquent ORM Basic
+
+### 12.1 Whai is Eloquent ORM
+
+Eloquent is laravel's built in library.
+
+- Interact with Database using PHP object
+- Each table has corresponding 'model'
+- Activer record implementation
+- Relationships
+- Makes it simple to work with Database
+
+### 12.2 Generate Model with Artisan
+
+```bash
+php artisan make:model FuelType
+```
+
+Generate migration file along with model
+
+```bash
+php artisan make:model FuelType -m
+```
+
+Generate controller file along with model
+
+```bash
+php artisan make:model FuelType -mc
+```
+
+To know information about a model
+
+```bash
+php artisan model:show <model-name>
+```
+
+By default laravel create table name in snake_case with plural form. FuelType -> fuel_types.  
+But we can always give cutome name to table:
+
+```php
+protected $table = 'car_fuel_types'
+```
+
+### 12.3 Eloquent Model Conventions
+
+By default laravel assume that your primary key will be `id`, but if you want to cutomise it:
+
+```php
+class FuelType extends Model
+{
+    protected $primaryKey = 'fule_type_id';
+}
+```
+
+**Disable auto increment for primary key:**
+
+```php
+class FuelType extends Model {
+    public $incrementing = false;
+}
+```
