@@ -2304,6 +2304,24 @@ DATABASE_URL=driver://username:password@host:port/database
 
 ### 10.3 Explore Project's Database Schema
 
+Show you the all table
+
+```bash
+php artisan db:show
+```
+
+Show the specific table
+
+```bash
+php artisan db:table users
+```
+
+```bash
+php artisan tinker
+
+Schema::getColumnListing('users')
+```
+
 ## 11. Migration
 
 ### 11.1 What are Migrations ?
@@ -2508,3 +2526,882 @@ Class CarController extends Controller {
 ```
 
 ### 12.6 Select Data using Eloquent - The Basic
+
+#### `Model::get()`
+
+**Give you all data from particular table.**
+
+```php
+public function index()
+{
+    $cars = Car::get();
+    return view('home.index');
+}
+```
+
+#### `Model::where()`
+
+**Give data about particular attribute from particluar table.**
+
+```php
+public function index()
+{
+    $cars = Car::where(column: 'published_at', operator: '!=', value: null)->get();
+
+    // exact value to match
+    $cars = Car::where(column: 'published_at', operator: "someValue")->get();
+
+    dump($cars);
+
+    return view('home.index');
+    }
+```
+
+#### `Model::first()`
+
+**Select the first data.**
+
+```php
+public function index()
+{
+    $cars = Car::where(column: 'published_at', operator: '!=', value: null)->first();
+    $cars = Car::first();
+
+    dump($cars);
+
+    return view('home.index');
+}
+```
+
+#### `Model::find()`
+
+**Select based on id.**
+
+```php
+public function index()
+{
+    $cars = Car::find(id: 2);
+
+    dump($cars);
+
+    return view('home.index');
+}
+```
+
+#### `Model::orderBy()`
+
+**Give data by ordering.**
+
+```php
+public function index()
+{
+
+    $cars = Car::orderBy(column: 'published_at', direction: 'desc')->get();
+
+    dump($cars);
+
+    return view('home.index');
+}
+```
+
+#### `Model::limit()`
+
+**Give n data.**
+
+```php
+public function index()
+{
+
+    $cars = Car::orderBy(column: 'published_at', direction: 'desc')
+    ->limit(2)
+    ->get();
+
+    dump($cars);
+
+    return view('home.index');
+}
+```
+
+---
+
+### 12.7 Insert Data using Eloquent - The Basic
+
+```php
+public function index()
+{
+    $car = new Car();
+
+    $car->maker_id = 1;
+    $car->model_id = 1;
+    $car->years = now();
+    $car->save();
+
+    return view('home.index');
+}
+```
+
+### 12.8 Insert Data - Using $fillable
+
+**Method 1:**
+
+```php
+public function index()
+{
+    $carData = [
+        'maker_id' => 1,
+        'model_id' => 1,
+        'years' => now(),
+    ];
+
+    $car = Car::create(attributes: $carData);
+
+    return view('home.index');
+}
+
+// this will give error => `MassAssignmentException`
+
+// You have to do this
+
+`Model/Car.php`
+protected $fillable = [
+    'maker_id',
+    'model_id',
+    'years',
+];
+```
+
+**Method 2:**
+
+```php
+public function index()
+{
+
+    $carData = [
+        // some data
+    ];
+    $car = new Car();
+
+    $car->fill($carData);
+    $car->save();
+
+    return view('home.index');
+}
+```
+
+**Method 3:**
+
+```php
+public function index()
+{
+
+    $carData = [
+        // some data
+    ];
+
+    $car = new Car($carData);
+    $car->save();
+
+    return view('home.index');
+}
+```
+
+**`$guarded`**
+
+```php
+`Models/Car.php`
+
+protected $guarded = ['user_id']; // everything is fillable except 'user_id'
+```
+
+### 12.9 Update Data - The Basic
+
+```php
+$car = Car::find(id: 1);
+$car->price = 11000;
+$car->save();
+```
+
+### 12.10 Update or Create
+
+```php
+public function index()
+{
+
+    Car::updateOrCreate(
+        attributes: ['vin' => '1223', 'price' => 14000], // condition
+        values: ['vin' => '8']
+    );
+
+    return view('home.index');
+}
+```
+
+### 12.11 Perform Mass Update
+
+```php
+Car::where('published_at', null)
+    ->where('user_id', 1)
+    ->update(['published_at' => now()]);
+```
+
+### 12.11 Delete a Single Record
+
+#### Method 1: Soft Delete
+
+If there is `deleted_at`, `SoftDelete` => it will not deleted from database, just value will be not null
+
+```php
+$car = Car::find(8);
+$car->delete();
+```
+
+#### Mehtod 2: Mass Delete
+
+```php
+Car::destroy(ids: 1);
+Car::destroy(ids: [1,2 ]);
+// or
+Car::destroy(ids: 1,2 );
+```
+
+#### Method 3
+
+```php
+Car::where('published_at', null)->delete();
+
+// Runs only 1 SQL query. Much faster.
+Car::whereIn('id', [1, 2])->delete();
+```
+
+#### Method 4
+
+Delete all the table, as well as from DB also.
+
+```php
+Car::truncate();
+```
+
+---
+
+## 13 Eloquent ORM Relationship
+
+---
+
+**The Migration defines the RULES (Constraints). The Model defines the SHORTCUTS (Helpers).**
+If you only define the foreignId in the migration, your database is safe, but your code is "dumb."
+
+### Doubut
+
+**1. The Migration (The "Police Officer")**
+When you write this in your migration:
+
+```php
+$table->foreignId('user_id')->constrained();
+```
+
+You are talking directly to **PostgreSQL**. You are setting a hard rule inside the database engine.
+
+- **Job**: It prevents "Orphaned Data." It stops you from creating a Post for a User that doesn't exist.
+- **Limitation**: It does not tell PHP how to fetch that data. PostgreSQL knows the relationship exists, but Laravel (the PHP code) does not.
+
+**2. The Model (The "Translator")**
+When you write this in your Model:
+
+```php
+public function user() {
+    return $this->belongsTo(User::class);
+}
+```
+
+You are teaching Laravel how to write SQL for you.
+
+Without this function, if you try to do `$post->user`, Laravel will say: "I don't know what 'user' means. Is it a column? A function? A relationship?"
+
+Scenario: What if you ONLY have the Migration?
+Imagine you deleted the `user()` method from your `Post` model, but kept the migration.
+
+❌ This code will now crash:
+
+```php
+$post = Post::find(1);
+echo $post->user->name; // ERROR: Attempt to read property "name" on null
+```
+
+Why? Because Laravel doesn't scan your database schema every time it runs (that would be too slow). It relies on your Model code to know that `$post->user` means "Go run `SELECT * FROM users WHERE id = post.user_id`".
+
+### 13.1 One-to-one Relationship
+
+Car has feature
+
+`Car.php`
+
+```php
+public function feature(): HasOne // good practice to write return type
+{
+    // 2nd param is optional, laravel automatically detect it by -> lowercase(model) + '_id'
+    return $this->hasOne(CarFeatures::class, 'car_id');
+}
+
+// by default oldestOfMany look at `created_at` field
+public function primaryImage(): HasOne
+{
+    return $this->hasOne(CarImage::class)->oldestOfMany('position');
+}
+
+public function primaryImage(): HasOne
+{
+    return $this->hasOne(CarImage::class)->latestOfMany('position');
+}
+```
+
+**Working with one-to-one Relationship:**
+
+```php
+//HomeController.php
+
+public function index()
+{
+    $car = Car::find(1);
+
+    dump($car->features, $car->primaryImage);
+
+    return view('home.index');
+}
+```
+
+**Update car feature value:**
+
+```php
+// Method 1
+$car->features->abs = false;
+$car->features->save();
+
+// Another way
+$car->features->update(['abs' => false]);
+```
+
+#### Property vs Method
+
+- `$car->features` (Property) = The DATA (The Result).
+- `$car->features()` (Method) = The QUERY (The Builder).
+
+**1. `$car->features` (The Property)**
+
+When you access the relationship as a property (without brackets), Laravel automatically executes the SQL query, fetches the data from the database, and gives you a Collection (an array on steroids).
+
+- What it returns: `Illuminate\Database\Eloquent\Collection`
+- When to use it: When you just want to loop through the data or display it.
+
+```php
+// Laravel runs: SELECT * FROM features WHERE car_id = 1
+$features = $car->features;
+
+foreach ($features as $feature) {
+    echo $feature->name; // "Bluetooth", "Sunroof"
+}
+```
+
+**2. `$car->features()` (The Method)**
+
+When you call the relationship as a function (with brackets), Laravel does NOT run the query yet. It returns the "Query Builder" object, allowing you to add more rules to the SQL before you run it.
+
+- What it returns: `Illuminate\Database\Eloquent\Relations\HasMany` (or BelongsToMany)
+- When to use it: When you want to filter, sort, or count the data before fetching it from the database.
+
+```php
+// We are NOT running the query yet. We are building it.
+$query = $car->features();
+
+// Now we add a rule and run it
+// SQL: SELECT * FROM features WHERE car_id = 1 AND is_active = 1
+$activeFeatures = $query->where('is_active', true)->get();
+```
+
+### 13.2 One-to-many Relationship
+
+```php
+// Model
+public function images(): HasMany
+{
+    return $this->hasMany(CarImage::class);
+}
+
+// Controller
+$car = Car::find(1);
+dump($car->images);
+```
+
+**Insert data:**
+
+_Method 1:_
+
+```php
+$car = Car::find(1);
+
+CarImage::create([
+    'car_id' => $car->id, // You have to manually type this
+    'image_path' => 'uploads/car1.jpg'
+]);
+
+$car = Car::find(1);
+```
+
+_Method 2:_ The "Eloquent" Way (Recommended)
+
+```php
+$car = Car::find(1);
+
+$imageObj = new CarImage([]) // data
+$imageArr = [] // data
+
+$car->images()->save($imageObj); // expect instance, object
+
+// or
+$car->images()->create($imageArr); // expect array
+```
+
+_Method 3:_ Create multiple value
+
+```php
+$car->images()->saveMany([
+    new CarImage(['image_path' => 'something 1', 'position' => 1]),
+    new CarImage(['image_path' => 'something 2', 'position' => 2]),
+]);
+
+$car->images()->createMany([
+    ['image_path' => 'something 1', 'position' => 1],
+    ['image_path' => 'something 2', 'position' => 2]
+]);
+```
+
+### 13.3 Many-to-one Relationships
+
+```php
+// Car model
+public function carType() {
+    return $this->belongsTo(CarType::class);
+}
+
+// CarType Model
+public function Car() {
+    return $this->hasMany(Car::class);
+}
+
+//Controller
+public function index()
+{
+    $carType = CarType::where('name', 'Hatchback')->first();
+    $cars = Car::whereBelongsTo($carType)->get();
+
+    //or
+    $cars = $carType->cars;
+    dump($cars);
+
+    return view('home.index');
+}
+```
+
+```php
+$car = Car::find(1);
+$carType = CarType::where('name', 'Sedan')->first();
+
+$car->car_type_id = $carType->id;
+$car->save();
+
+//or
+$car->carType()->associate($carType);
+$car->save();
+```
+
+### 13.4 Many-to-Many Relationship
+
+**1. The Database Structure (The "Pivot" Table)**
+In a One-to-Many, you just add a `maker_id` column to the `cars` table.
+In Many-to-Many, you cannot do that. (If a car has 5 features, you can't have 5 columns).
+
+You create a third table called a **Pivot Table**.
+Naming Rule: It must be singular and alphabetical (`car_favourite`).
+
+The Migration (`create_car_favourite_table.php`):
+
+```php
+Schema::create('car_favourite', function (Blueprint $table) {
+    $table->id();
+
+    // The Connector for Car
+    $table->foreignId('user_id')->constrained()->onDelete('cascade');
+
+    // The Connector for Feature
+    $table->foreignId('car_id')->constrained()->onDelete('cascade');
+});
+```
+
+**2. The Models**
+You use `belongsToMany` on BOTH sides.
+
+In `Car.php`
+
+```php
+public function favouredUsers(): BelongsToMany
+{
+    return $this->belongsToMany(
+        related: User::class,
+        table: 'favourite_cars', // default table => car_user. It must be singular and alphabetical
+        foreignPivotKey: 'car_id', // default
+        relatedPivotKey: 'user_id' // default
+    );
+}
+```
+
+In `User.php`
+
+```php
+public function favouriteCars(): BelongsToMany
+{
+    return $this->belongsToMany(related: Car::class, table: 'favourite_cars');
+}
+```
+
+**Use case:**
+
+```php
+public function index()
+{
+    $car = Car::find(1);
+    dump($car->favouredUsers);
+
+    // same
+
+    $user = User::find(1);
+    dump($user->favouriteCars);
+}
+```
+
+**A. Adding a Favourite (`attach`)**
+
+```php
+$user = User::find(1);
+$user->favouriteCars()->attach([1, 2], );
+```
+
+**B. Removing a Favourite (`detach`)**
+
+```php
+$user = User::find(1);
+$user->favouriteCars()->detach([1, 2], );
+```
+
+**C. `sync`**
+
+Imagine your user has a form with checkboxes for features. They check "Bluetooth" (2) and "GPS" (3), but uncheck "Sunroof" (1).
+
+Instead of writing complex "if/else" logic to delete the old ones and add the new ones, you just use `sync`.
+
+```php
+// Laravel automatically:
+// 1. Deletes everything NOT in this list (Sunroof)
+// 2. Adds everything NEW in this list (GPS)
+// 3. Keeps existing ones (Bluetooth)
+$car->features()->sync([2, 3]);
+```
+
+`syncWithPivotValues`
+
+Gemini said
+This is a "Pro" version of the `sync()` method. It is incredibly useful when your pivot table has extra columns (like `role`, `status`, or `expires_at`) and you want to set the same value for all the items you are attaching.
+
+Hard way
+
+```php
+// Trying to set 'status' => 'active' for projects 1, 2, and 3
+$user->projects()->sync([
+    1 => ['status' => 'active'],
+    2 => ['status' => 'active'],
+    3 => ['status' => 'active'],
+]);
+```
+
+easiyer
+
+```php
+// Argument 1: List of IDs
+// Argument 2: The Pivot Data to apply to EVERYONE
+$user->projects()->syncWithPivotValues([1, 2, 3], ['status' => 'active']);
+```
+
+Ordering -> Ownership style => `belongsTo`, `hasMany`, `belongsToMany`
+
+I belong to X, I have Y, and I am related to Z.
+
+**The "Standard" Ordering (Top to Bottom)**
+Most Laravel teams (and the official documentation examples) tend to follow this hierarchy:
+
+1. Constants & Properties ($table, $fillable, $casts)
+2. Lifecycle Boot Methods (booted())
+3. Relationships (Grouped by "Importance" or Type)
+4. Scopes (scopeActive())
+5. Accessors/Mutators (getFirstNameAttribute)
+6. Helper Methods (isAdmin())
+
+---
+
+## 14 Factories
+
+---
+
+### 14.1 Introduction to Factories
+
+In Laravel, a factory is a **powerful tool used to generate realistic, fake data for testing and database seeding purposes.** Instead of manually writing code to create database records for tests, factories provide a blueprint that automatically generates model instances with random, yet consistent, data.
+
+- Tools to generate fake data.
+- Define how model data should be created.
+- Quickly generate hundreds of records.
+- Helpful for testing and data seeding.
+
+**Key Concepts.**
+
+- **Purpose:** Factories streamline the process of setting up a local development environment or preparing data for automated tests, saving significant manual effort.
+- **Model Association:** Each factory is associated with a specific Eloquent model (e.g., User, Post), allowing you to create records that adhere to your application's data structure and relationships.
+- **Faker Library:** Factories leverage the Faker PHP library to generate diverse kinds of random data like names, email addresses, dates, or job titles.
+- **Definition:** A factory class contains a definition() method that returns an array of default attribute values for the model. This defines the structure of the fake data.
+
+---
+
+### 14.2 Generate Factories
+
+_create factory:_
+
+```bash
+php artisan make:factory CarFactory
+```
+
+_Create factory and associate the model with it:_
+
+```bash
+php artisan make:factory CarFactory --model=Car
+```
+
+_Create model and factory at once:_
+
+```bash
+php artisan make:model Car -f
+```
+
+_Manually connect model with factory, if model and factory name is different:_
+
+`Model`
+
+```php
+protected static function newFactory()
+{
+    return CarNewfactory::new(); // diff factory name
+}
+```
+
+In `Factory`
+
+```php
+protected $model = ModelName::class
+```
+
+**Open `database/factories/CarFactory.php`:**
+
+The `definition()` method is where you tell the robot how to build a dummy Car. We use a library called **Faker** (accessed via `$this->faker`) to generate fake data.
+
+```php
+public function definition()
+{
+    return [
+        // 'fake()->' gives you random realistic data
+        'model' => fake()->word(), // "voluptatum"
+        'price' => fake()->numberBetween(5000, 50000), // 24500
+        'year' => fake()->year(), // 2023
+        'vin' => fake()->bothify('VIN-####-????'), // "VIN-1234-ABCD"
+        'color' => fake()->safeColorName(), // "red"
+
+        // RELATIONS (The Senior Dev Trick)
+        // This automatically creates a NEW Maker for every Car.
+        // No more "foreign key constraint fails"!
+        'maker_id' => \App\Models\Maker::factory(),
+    ];
+}
+```
+
+---
+
+### 14.3 Use Factories to generate Data
+
+```php
+$maker1 = Maker::factory()->make(); // staty only in RAM, no id
+dd($maker1);
+
+$maker2 = Maker::factory()->create(); // insert data in DB, has id
+dd($maker2);
+```
+
+**Create multiple record in db:**
+
+```php
+$makers = Maker::factory()->count(10)->create();
+dd($makers);
+```
+
+**Create same, multiple value:**
+
+```php
+User::factory()->count(10)
+  ->create([
+    'name' => 'Afrit',
+  ]);
+```
+
+`State()`
+
+What if you frequently need "Sold" cars or "Luxury" cars? Instead of overriding manually every time, you define a State.
+
+`CarFactory.php`
+
+```php
+public function luxury()
+{
+    return $this->state(function (array $attributes) {
+        return [
+            'price' => 100000,
+            'is_luxury' => true,
+        ];
+    });
+}
+
+//usages
+
+// Give me 3 Luxury Cars
+Car::factory()->count(3)->luxury()->create();
+```
+
+`sequences()`
+
+Create fist data Afrit then Asrit and so on.
+
+```php
+User::factory()
+    ->count(10)
+    ->sequence(
+        ['name' => 'Afrit'],
+        ['name' => 'Asrit']
+    )
+    ->create();
+```
+
+**Create data with numbering:**
+
+```php
+User::factory()
+    ->count(10)
+    ->sequence(fn(Sequence $sequence) => ['name' => 'Name ' . $sequence->index])
+    ->create();
+```
+
+`unverified()`
+
+```php
+User::factory()
+    ->count(10)
+    ->unverified() // it will email_verified_at to nulll
+    ->create();
+```
+
+`trashed()`
+
+```php
+User::factory()
+    ->count(10)
+    ->trashed() // each record of deleted_at will have some value
+    ->create();
+```
+
+### 14.4 Factorty Callbacks
+
+Factory Callbacks are Hooks. They allow you to say:
+"Hey Laravel, immediately AFTER you create a User, please do this extra thing automatically."
+
+**1. The Scenario: "Every User Needs a Profile"**
+Imagine you have a `users` table and a `profiles` table (1-to-1 relationship).
+
+- You cannot create a Profile before the User exists (because you need the `user_id`).
+- You don't want to manually create a profile every time you run `User::factory()->create()`.
+
+The Solution: Use a Callback inside the Factory to automate it.
+
+**2. How to Write It (configure method):**
+
+You don't put this in `definition()`. You put it in a special method called `configure()`.
+
+```php
+namespace Database\Factories;
+
+use App\Models\User;
+use App\Models\Profile;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class UserFactory extends Factory
+{
+    /**
+     * Configure the model factory.
+     */
+    public function configure()
+    {
+        // "afterCreating" runs AFTER the user is inserted into the DB.
+        // The $user object here has an ID!
+        return $this->afterCreating(function (User $user) {
+
+            // AUTOMATION: Create a profile linked to this user
+            Profile::factory()->create([
+                'user_id' => $user->id,
+            ]);
+
+        });
+    }
+
+    public function definition()
+    {
+        return [
+            'name' => fake()->name(),
+            'email' => fake()->unique()->safeEmail(),
+        ];
+    }
+}
+```
+
+Two types of callbacks -> `afterMaking`, `afterCreating`
+
+### 14.5 Factory Realtionship
+
+#### One to Many
+
+#### Belongs To
+
+#### Many To Many
+
+## 15 Data Seeding
+
+A seeder in Laravel is a class used to populate your database tables with initial or sample data.  
+This is especially useful during the development and testing phases of an application when you need a consistent dataset to work with, or to insert essential configuration data required for the  
+application to function correctly.
+
+- **Development and Testing:** Seeders allow developers to quickly generate dummy data for testing features without manual data entry.
+- **Initial Configuration:** They can also be used to insert essential data that an application needs on its first run, such as default user accounts, countries, or configuration settings.
+- **Reproducible Environments:** By using seeders, all developers on a team can have a uniform, reproducible database environment by running simple Artisan commands, minimizing setup inconsistencies.
+
+```bash
+php artisan db:seed
+```
+
+### Create and Run Seeders
+
+```bash
+php artisan make:seeder UsersSeeder
+```
+
+```bash
+php artisan db:seed --class=UserSeeder
+```
