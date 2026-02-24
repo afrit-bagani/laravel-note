@@ -3732,3 +3732,322 @@ foreach ($cars as $car) {
 select * from 'cars' where 'cars'.'deleted_at' is null limit 5
 select * from 'car_images' where 'car_images'.'car_id' in (1, 2, 3, 4, 5) and 'position' = 1
 ```
+
+## join table
+
+```php
+public function search()
+{
+    $query = Car::with(['primaryImage', 'city', 'maker', 'model', 'carType', 'fuelType'])
+        ->where('published_at', '<', now())
+        ->orderBy('published_at', 'desc');
+
+    $states = $query->join('cities', 'cities_id', '=', 'cars.city_id'); 
+
+    // filter the data
+    $res = $states->where('city.state_id', 1) 
+
+    return view('car.search', compact('cars', 'carCount'));
+}
+```
+
+_Use join for optimization:_
+
+```php
+// here you doing query for city 
+$query = Car::with(['primaryImage', 'city', 'maker', 'model', 'carType', 'fuelType']) 
+    ->where('published_at', '<', now())
+    ->orderBy('published_at', 'desc');
+
+$query->join('cities', 'cities.id', '=', 'cars.city_id')
+    ->where('cities.state_id', 1);
+
+// blade file
+ <small class="m-0 text-muted">{{ $car->city->name }}</small> // here also doing query for city
+
+// optimised code
+$query = Car::with(['primaryImage', 'maker', 'model', 'carType', 'fuelType']) // remove city
+    ->where('published_at', '<', now())
+    ->orderBy('published_at', 'desc');
+
+$query->join('cities', 'cities.id', '=', 'cars.city_id')
+    ->where('cities.state_id', 1);
+
+$query->select('cars.*', 'cities.name as city_name'); // you dont't need whole city table, only need city's name
+
+// blade file
+ <small class="m-0 text-muted">{{ $car->city_name }}</small> // just using the value
+```
+
+Advance join using function -> clauses
+
+## `where` cluase
+
+```php
+$cars = Car::where('year', '=', 2020)
+    ->where('price', '>', 10000)
+    ->where('address', 'like', '%york%')
+    ->get();
+
+// same as
+$cars = Car::where([
+    ['year', '=', 2020],
+    ['price', '>', 10000],
+    ['address', 'like', '%york%']
+])->get();
+```
+
+### `orWhere()`
+
+```php
+// select very old cars or very new ones
+$cars = Car::where('year', '<', 1970)
+    ->orWhere('year', '>', 2022)
+    ->get();
+```
+
+### `whereNot()`
+
+```php
+$cars = Car::whereNot('mileage', '>', 10000)->get();
+```
+
+### `whereAny()`: return if any field is true, return multiple column
+
+```php
+$cars = Car::whereAny(['address', 'description'], 'like', '%york%')
+    ->get();
+```
+
+### `whereBetween()` / `orWhereBetweeen`
+
+```php
+$cars = Car::whereBetween('year', [2000, 2020])->get();
+```
+
+### `whereNotBetween` / `orWhereNotBetween`
+
+```php
+// select car where year is not between 2000 and 2020
+
+$cars = Car::whereNotBetween('year', [2000, 2020])->get();
+```
+
+### `whereNull` / `whereNotNull` / `orWhereNull` / `orWhereNotNull`
+
+```php
+//select cars which are not published yet
+$cars = Car::whereNull('published_at')->get();
+
+// select cars which are published
+$cars = Car::whereNotNull('published_at')->get();
+```
+
+### `whereIn` / `whereNotIn` / `orWhereIn` / `orWhereNotIn`
+
+```php
+// select cars where maker_id is 1 or 2
+$cars = Car::whereIn('maker_id', [1, 2])->get();
+
+// select cars where maker_id is not 1 or 2
+$cars = Car::whereNotIn('maker_id', [1, 2])->get();
+```
+
+_`whereIn()`_ also accept queryBuilder
+
+```php
+// select users which are signed up with Google
+$users = User::whereNotNull('google_id');
+
+// select cars for users which are signed up with Google
+$cars = Car::whereIn('users_id', $users)->get();
+
+/* Generated SQL:
+    select * from cars where user_id in (
+    select id
+    from users
+    where google_id is not null
+    )
+*/
+```
+
+### `whereDate` / `whereMonth` / `whereDay` / `whereYear` / `whereTime`
+
+```php
+//published at specific Data
+->whereDate('published_at', '2024-07-12')
+
+//published at specific month
+->whereMonth('published_at', '07')
+
+//published at the first day of the month
+->whereDay('published_at', '01')
+
+//published at last year
+->whereYear('published_at', '2023')
+
+//published at specific time
+->whereTime('published_at', '=', '11:20:45')
+```
+
+### `whereColumn` / `orWhereColumn`
+
+```php
+// created and updated at the same time
+->whereColumn('created_at', '=', 'updated_at')
+
+// updated at is greater than created at
+->whereColumn('updated_at', '>', 'created_at')
+
+->whereColumn([
+    ['column1', '=', 'column2'], 
+    ['updated_at', '>', 'created_at'],
+])
+```
+
+### `whereBetweenColumns` / `whereNotBetweenColumns` / `orWhereBetweenColumns` / `orWhereNotBetweenColumns`
+
+```php
+$patients = DB::table('patients')
+->whereBetweenColumns(
+    'weight', 
+    ['minimum_allowed_weight', 'maximum_allowed_weight']
+)->get();
+
+$patients = DB::table('patients')
+->whereNotbetweenColumns(
+    'weight', 
+    ['minimum_allowed_weight', 'maximum_aloowedweight']
+    ->get()[]
+)
+```
+
+### `whereFullText()`
+
+```php
+$cars = Car::whereFullText('description', 'bmw')->get();
+```
+
+### multiple where grouping
+
+```php
+Car::where('year', '>=', 2010)
+->where('price', '>', 10000)
+->orWhere('price', '<', 5000)
+
+/* Generated SQL:
+    select * from `cars`
+    where `year` >= 2010
+    and `price` > 10000 
+    or `price` < 5000
+*/
+
+// is same as
+Car::where('year', '>=', 2010)
+->where(function (Builder $query){
+    $query->where('price', '>', 10000)
+        ->orWhere('price', '<', 5000);
+})
+
+/* Generated SQL:
+    select * from `cars`
+    where `year` >= 2010
+    and (`price` > 10000 or `price` < 5000)
+*/
+```
+
+### `whereExists`
+
+```php
+// select cars that have images
+$carWithImages = Car::whereExists(function ($query){
+    $query->select('id')
+        ->from('car_images')
+        ->whereColumn('car_images.car_id', 'cars.id')
+})->get();
+
+//or
+$carWithImages = Car::whereExists(
+    CarImage::select('id')
+        ->whereColumn('car_images.car_id', 'cars.id')
+)->get();
+
+```
+
+_sql query:_
+
+```sql
+select * from 'cars'
+where exists (
+    select 'id' from 'car_images'
+    where 'car_images'.'car_id' = 'cars'.'id'
+)
+```
+
+### Subquery where clause
+
+```php
+// find sedan cars
+$sedanCars = Car::where(function (Builder $query){
+    $query->select('name')
+        ->from('car_types')
+        ->whereColumn('cars.car_type_id', 'car_types.id')
+        ->limit(1);
+}, '=', 'Sedan')->get();
+
+// The same as
+$subquery = CarType::select('name')
+    ->whereColumn('cars.car_type_id', 'car_types.id')
+    ->limit(1);
+$sedanCars = Car::where($subquery, '=', 'Sedan')->get();
+```
+
+_sql query:_
+
+```sql
+SELECT * FROM `cars`
+WHERE (
+    SELECT `name`
+    FROM `car_types`
+    WHERE `cars`.`car_type_id` = `car_types`.`id`
+    LIMIT 1
+) = `Sedan`
+```
+
+```php
+// select cars which has price average price
+$cars = Car::where('price', '<', function (Builder $query){
+    return $query->selectRaw('AVG(price)')->from('cars')
+})->get();
+```
+
+_sql query:_
+
+```sql
+select * from 'cars'
+where 'price' < (
+    select AVG(price) from 'cars'
+)
+```
+
+### query debuggin
+
+```php
+// dump the query with parameter
+Car::where('price', '>', 10000)->dump();
+
+// dump and die
+Car::where('price', '>', 10000)->dd();
+
+// dump the raw sql, with parameter replaced already
+Car::where('price', '>', 10000)->tosql();
+
+// dump the raw sql, and die
+Car::where('price', '>', 10000)->ddRawSql();
+```
+
+## Pagination
+
+```php
+$cars = $query->paginate(15);
+

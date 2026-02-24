@@ -15,12 +15,13 @@ class CarController extends Controller
      */
     public function index()
     {
-        $cars = User::findOrFail(5)
+        $cars = User::with(['primaryImage', 'model', 'maker'])->findOrFail(5)
+            ->findOrFail(5)
             ->cars()
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('car.index', ['cars' => $cars]);
+        return view('car.index', compact(['cars']));
     }
 
     /**
@@ -73,30 +74,32 @@ class CarController extends Controller
 
     public function search()
     {
-        $query = Car::where('published_at', '<', now())
+        $query = Car::with(['primaryImage', 'city', 'maker', 'model', 'carType', 'fuelType'])
+            ->where('published_at', '<', now())
             ->orderBy('published_at', 'desc');
 
-        $carCount = $query->count();
-        $cars = $query->limit(30)->get();
+        $query->join('cities', 'cities.id', '=', 'cars.city_id')
+            ->where('cities.state_id', 1);
 
-        return view('car.search', compact('cars', 'carCount'));
+        $query->select('cars.*', 'cities.name as city_name');
+
+        $cars = $query->paginate(15);
+
+        return view('car.search', compact('cars'));
     }
-
     public function watchlist()
     {
-        // $cars = User::findOrFail(4)
-        //     ->favouriteCars;
-
-        // dump($cars);
-
-        $cars = User::with([
-            'favouriteCars.primaryImage',
-            'favouriteCars.maker',
-            'favouriteCars.model',
-            'favouriteCars.city',
-            'favouriteCars.carType',
-            'favouriteCars.fuelType'
-        ])->findOrFail(4)->favouriteCars;
+        $cars = User::findOrFail(4)
+            ->favouriteCars()
+            ->with([
+                'primaryImage',
+                'city',
+                'maker',
+                'model',
+                'carType',
+                'fuelType'
+            ])
+            ->get();
 
         return view('car.watchlist', ['cars' => $cars]);
     }

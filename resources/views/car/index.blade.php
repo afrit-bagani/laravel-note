@@ -19,10 +19,10 @@
                                 @forelse ($cars as $car)
                                     <tr>
                                         <td>
-                                            <img src="{{ $car->primaryImage->image_path }}" alt=""
+                                            <img src="{{ $car->primaryImage?->image_path }}" alt=""
                                                 class="my-cars-img-thumbnail" />
                                         </td>
-                                        <td>{{ $car->year }} - {{ $car->model->name }}</td>
+                                        <td>{{ $car->year }} | {{ $car->model->name }} | {{ $car->maker->name }}</td>
                                         <td>{{ $car->getCreateDate() }}</td>
                                         <td>{{ $car->published_at ? 'Yes' : 'No' }}</td>
                                         <td class="">
