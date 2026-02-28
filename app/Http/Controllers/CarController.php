@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Car;
+use App\Models\User;
 use Illuminate\Http\Request;
+
+use function Symfony\Component\Clock\now;
 
 class CarController extends Controller
 {
@@ -11,7 +15,13 @@ class CarController extends Controller
      */
     public function index()
     {
-        return view('car.index');
+        $cars = User::with(['primaryImage', 'model', 'maker'])->findOrFail(5)
+            ->findOrFail(5)
+            ->cars()
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('car.index', compact(['cars']));
     }
 
     /**
@@ -33,9 +43,9 @@ class CarController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Car $car)
     {
-        return view('car.show');
+        return view('car.show', ['car' => $car]);
     }
 
     /**
@@ -64,6 +74,33 @@ class CarController extends Controller
 
     public function search()
     {
-        return view('car.search');
+        $query = Car::with(['primaryImage', 'city', 'maker', 'model', 'carType', 'fuelType'])
+            ->where('published_at', '<', now())
+            ->orderBy('published_at', 'desc');
+
+        $query->join('cities', 'cities.id', '=', 'cars.city_id')
+            ->where('cities.state_id', 1);
+
+        $query->select('cars.*', 'cities.name as city_name');
+
+        $cars = $query->paginate(9);
+
+        return view('car.search', compact('cars'));
+    }
+    public function watchlist()
+    {
+        $cars = User::findOrFail(4)
+            ->favouriteCars()
+            ->with([
+                'primaryImage',
+                'city',
+                'maker',
+                'model',
+                'carType',
+                'fuelType'
+            ])
+            ->get();
+
+        return view('car.watchlist', ['cars' => $cars]);
     }
 }

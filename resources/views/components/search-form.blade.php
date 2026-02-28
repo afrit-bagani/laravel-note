@@ -1,4 +1,3 @@
-!-- Find a car form -->
 <section class="find-a-car">
     <form action="{{ route('car.search') }}" method="GET" class="find-a-car-form card flex p-medium">
         <div class="find-a-car-inputs">
@@ -366,4 +365,3 @@
         </div>
     </form>
 </section>
-<!--/ Find a car form -->

@@ -1021,6 +1021,14 @@ There is two ways to pass variable to view
 - using `associative array`
 
 ```php
+return view('home.index', ['cars' => $cars]);
+
+or
+
+return view('home.index, compact('cars'));
+```
+
+```php
 public function index()
 {
     return view('home.index', ['name' => 'Afrit', 'surname' => 'Bagani']);
@@ -2375,7 +2383,7 @@ php artisan make:migration create_car_types_table
 
 It run the migration and show the sql command
 
-```bash
+```bashcars
 php artisan migrate --pretend
 ```
 
@@ -3405,3 +3413,641 @@ php artisan make:seeder UsersSeeder
 ```bash
 php artisan db:seed --class=UserSeeder
 ```
+
+Running seeder is not allowed in production
+
+Running seeder in production forcefully
+
+```bash
+php artisan db:seed --force
+```
+
+**Fill the DB with seed data:**
+
+```bash
+php artisan migrate --seed
+```
+
+**To use one seeder to another seeder:**
+
+`DatabaseSeeder.php`
+
+```php
+User::factory()->create([
+    'name' => 'Tester User', 
+    'email' => 'test@example.com',
+]);
+
+$this->call([
+    UsersSeeder::class
+]);
+```
+
+**Drop all the table and apply the seeder:**
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+---
+
+## 16 Output Data on Website
+
+---
+
+## Query Data
+
+Query Data without model
+
+If you don't have model, still you can fetch data using `query`
+
+```php
+$cars = DB::table('cars') -> get();
+dd($cars);
+```
+
+```php
+// get all cars
+$car = Car::get();
+
+// get first car
+$car = Car::first();
+
+//get a single value from the first car
+$highestPrice = Car::orderBy('price', 'desc')->value('price');
+
+// get list of values from from column
+$prices = Car::orderBy('price', 'desc')->pluck('price'); // array 
+$prices = Car::orderBy('price', 'desc')->pluck('price', 'id'); // associat array 
+
+// check specific user does't have car
+if(Car::where('user_id', 1)->exists()){
+    // user has car
+}
+if(Car::where('user_id', 1)->doesntxists()){
+    // user does't have cars
+}
+```
+
+`select()`
+
+```php
+$cars = Car::select('vin', 'price')->get();
+
+// using alias
+$cars = Car::select('vin', 'price as car_price')->get();
+
+// add another column in select at later stage
+$cars_with_mileage = $car->addSelect('mileage')->get(); 
+```
+
+**Select distinct record:**
+
+```php
+$cars = Car::select('maker_id', 'model_id')->distinct()->get();
+```
+
+`offset()`
+
+```php
+// select 10 cars starting from 6th
+$cars = Car::limit(10)->offset(5)->get();
+
+// same, but using skip and take
+$cars = Car::skip(5)->take(10)->get();
+```
+
+_Aggregate fn:_
+
+```php
+$carCount = Car::where('published_at', '!=', null)->count();
+$minPrice = Car::where('published_at', '!=', null)->min('price');
+$maxPrice = Car::where('published_at', '!=', null)->max('price');
+$avgPrice = Car::where('published_at', '!=', null)->avg('price');
+```
+
+_Grouping:_
+
+`groupBy()`:
+
+```php
+cars = Car::all();
+// 2. Group them by the 'maker_id' column
+$groupedCars = $cars->groupBy('maker_id');
+
+dump($groupedCars);
+```
+
+`selectRaw`: let you execute sql command
+
+```php
+$cars = Car::selectRaw('maker_id, COUNT(*) as total_cars, AVG(price) as average_price')
+    ->groupBy('maker_id')
+    ->get();
+```
+
+### Data Ordering
+
+We can do multiple data ordering
+
+```php
+Car::orderBy('published_at', 'desc')
+    ->orderBy('price', 'asc')
+    ->get();
+```
+
+`latest()` and `oldest()`, `inRandomOrder()`
+
+```php
+$cars = Car::latest()->get();
+
+// The same as 
+$cars = Car::orderBy('created_at', 'desc')->get();
+
+$cars = Car::oldest()->get();
+
+// The same as 
+$cars = Car::orderBy('created_at', 'asc')->get();
+
+// select data in rendom order
+$cars = Car::inRandomOrder()->get();
+```
+
+_Removing Order:_
+
+```php
+$query = Car::orderBy('published_at', 'desc');
+
+$cars = $query->reorder() // remove existing ordering
+          ->orderBy('price') // apply new ordering
+          ->get();
+
+// Same
+$cars = $query->reorder('price')->get()
+```
+
+### Eager Loading
+
+n + 1
+
+```php
+// select 5 cars
+
+$cars = Car::limit(5)->get();
+
+foreach($cars as $car){
+    echo $car->city->name;
+}
+```
+
+_Actual query under the hood:_
+
+```text
+n = 5
+total query = n + 1 => 6
+```
+
+```sql
+select * from 'cars' where 'cars'.'deleted_at' is null limit 5
+select * from 'cities' where 'cities'.'id' = 15 limit 1
+select * from 'cities' where 'cities'.'id' = 21 limit 1
+select * from 'cities' where 'cities'.'id' = 17 limit 1
+select * from 'cities' where 'cities'.'id' = 24 limit 1
+select * from 'cities' where 'cities'.'id' = 15 limit 1 
+```
+
+```php
+$cars = Car::limit(5)->get();
+
+foreach($cars as $car){
+    echo $car->city->name;
+    echo $car->carType->name;
+}
+```
+
+```text
+n = 5
+total field to fetch = 2
+total query = 2n + 1 => 11
+```
+
+```sql
+select * from 'cars' where 'cars'.'deleted_at' is null limit 5
+
+select * from 'cities' where 'cities'.'id' = 15 limit 1
+select * from 'car_types' where 'cities'.'id' = 3 limit 1
+
+select * from 'cities' where 'cities'.'id' = 21 limit 1
+select * from 'car_types' where 'cities'.'id' = 5 limit 1
+
+select * from 'cities' where 'cities'.'id' = 17 limit 1
+select * from 'car_types' where 'cities'.'id' = 1 limit 1
+
+select * from 'cities' where 'cities'.'id' = 24 limit 1
+select * from 'car_types' where 'cities'.'id' = 1 limit 1
+
+select * from 'cities' where 'cities'.'id' = 15 limit 1 -- double query
+select * from 'car_types' where 'cities'.'id' = 5 limit 1
+```
+
+`with`
+
+```php
+$cars = Car::with(['city', 'carType'])->limit(5)->get();
+
+foreach($cars as $car){
+    echo $car->city->name;
+    echo $car->carType->name;
+}
+```
+
+```sql
+select * from 'cars'.'deleted_at' is null limit 5
+select * from 'cities' where 'cities'.'id' in (15, 17, 21, 24)
+select * from 'car_types' where 'car_types'.'id' in (1, 3, 5)
+```
+
+_nested query:_
+
+```php
+$cars = Car::limit(5)->get();
+
+foreach($cars as $car){
+    echo $car->state->name;
+}
+```
+
+```sql
+select * from 'cars' where 'cars'.'deleted_at' is null limit 5
+
+select * from cities where 'cities'.'id' = 15 limit 1 -- it fetch cities, all though I don't need it
+select * from states where 'states'.'id' = 3 limit 1 
+-- so on
+```
+
+_Improve query:_
+
+```php
+$cars = Car::with(['city.state'])->limit(5)->get();
+
+foreach($cars as $car){
+    echo $car->city->state->name;
+}
+```
+
+### Eager loading by default
+
+```php
+class Car extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    protected $with = ['city.state', 'carType', 'fuelType'];
+
+    protected $guarded = [];
+
+    // other code
+}
+
+$cars = Car::limit(5)->get();
+
+foreach ($cars as $car){
+    echo $car->city->state->name; // now it will have 5 query
+}
+```
+
+### Constraing Eager Loads
+
+```php
+$cars = Car::with(['images' => function($query){
+    $query->where('position', 1);
+}])->limit(5)->get();
+
+foreach ($cars as $car) {
+    dump($car->image)
+}
+```
+
+```sql
+select * from 'cars' where 'cars'.'deleted_at' is null limit 5
+select * from 'car_images' where 'car_images'.'car_id' in (1, 2, 3, 4, 5) and 'position' = 1
+```
+
+## join table
+
+```php
+public function search()
+{
+    $query = Car::with(['primaryImage', 'city', 'maker', 'model', 'carType', 'fuelType'])
+        ->where('published_at', '<', now())
+        ->orderBy('published_at', 'desc');
+
+    $states = $query->join('cities', 'cities_id', '=', 'cars.city_id'); 
+
+    // filter the data
+    $res = $states->where('city.state_id', 1) 
+
+    return view('car.search', compact('cars', 'carCount'));
+}
+```
+
+_Use join for optimization:_
+
+```php
+// here you doing query for city 
+$query = Car::with(['primaryImage', 'city', 'maker', 'model', 'carType', 'fuelType']) 
+    ->where('published_at', '<', now())
+    ->orderBy('published_at', 'desc');
+
+$query->join('cities', 'cities.id', '=', 'cars.city_id')
+    ->where('cities.state_id', 1);
+
+// blade file
+ <small class="m-0 text-muted">{{ $car->city->name }}</small> // here also doing query for city
+
+// optimised code
+$query = Car::with(['primaryImage', 'maker', 'model', 'carType', 'fuelType']) // remove city
+    ->where('published_at', '<', now())
+    ->orderBy('published_at', 'desc');
+
+$query->join('cities', 'cities.id', '=', 'cars.city_id')
+    ->where('cities.state_id', 1);
+
+$query->select('cars.*', 'cities.name as city_name'); // you dont't need whole city table, only need city's name
+
+// blade file
+ <small class="m-0 text-muted">{{ $car->city_name }}</small> // just using the value
+```
+
+Advance join using function -> clauses
+
+## `where` cluase
+
+```php
+$cars = Car::where('year', '=', 2020)
+    ->where('price', '>', 10000)
+    ->where('address', 'like', '%york%')
+    ->get();
+
+// same as
+$cars = Car::where([
+    ['year', '=', 2020],
+    ['price', '>', 10000],
+    ['address', 'like', '%york%']
+])->get();
+```
+
+### `orWhere()`
+
+```php
+// select very old cars or very new ones
+$cars = Car::where('year', '<', 1970)
+    ->orWhere('year', '>', 2022)
+    ->get();
+```
+
+### `whereNot()`
+
+```php
+$cars = Car::whereNot('mileage', '>', 10000)->get();
+```
+
+### `whereAny()`: return if any field is true, return multiple column
+
+```php
+$cars = Car::whereAny(['address', 'description'], 'like', '%york%')
+    ->get();
+```
+
+### `whereBetween()` / `orWhereBetweeen`
+
+```php
+$cars = Car::whereBetween('year', [2000, 2020])->get();
+```
+
+### `whereNotBetween` / `orWhereNotBetween`
+
+```php
+// select car where year is not between 2000 and 2020
+
+$cars = Car::whereNotBetween('year', [2000, 2020])->get();
+```
+
+### `whereNull` / `whereNotNull` / `orWhereNull` / `orWhereNotNull`
+
+```php
+//select cars which are not published yet
+$cars = Car::whereNull('published_at')->get();
+
+// select cars which are published
+$cars = Car::whereNotNull('published_at')->get();
+```
+
+### `whereIn` / `whereNotIn` / `orWhereIn` / `orWhereNotIn`
+
+```php
+// select cars where maker_id is 1 or 2
+$cars = Car::whereIn('maker_id', [1, 2])->get();
+
+// select cars where maker_id is not 1 or 2
+$cars = Car::whereNotIn('maker_id', [1, 2])->get();
+```
+
+_`whereIn()`_ also accept queryBuilder
+
+```php
+// select users which are signed up with Google
+$users = User::whereNotNull('google_id');
+
+// select cars for users which are signed up with Google
+$cars = Car::whereIn('users_id', $users)->get();
+
+/* Generated SQL:
+    select * from cars where user_id in (
+    select id
+    from users
+    where google_id is not null
+    )
+*/
+```
+
+### `whereDate` / `whereMonth` / `whereDay` / `whereYear` / `whereTime`
+
+```php
+//published at specific Data
+->whereDate('published_at', '2024-07-12')
+
+//published at specific month
+->whereMonth('published_at', '07')
+
+//published at the first day of the month
+->whereDay('published_at', '01')
+
+//published at last year
+->whereYear('published_at', '2023')
+
+//published at specific time
+->whereTime('published_at', '=', '11:20:45')
+```
+
+### `whereColumn` / `orWhereColumn`
+
+```php
+// created and updated at the same time
+->whereColumn('created_at', '=', 'updated_at')
+
+// updated at is greater than created at
+->whereColumn('updated_at', '>', 'created_at')
+
+->whereColumn([
+    ['column1', '=', 'column2'], 
+    ['updated_at', '>', 'created_at'],
+])
+```
+
+### `whereBetweenColumns` / `whereNotBetweenColumns` / `orWhereBetweenColumns` / `orWhereNotBetweenColumns`
+
+```php
+$patients = DB::table('patients')
+->whereBetweenColumns(
+    'weight', 
+    ['minimum_allowed_weight', 'maximum_allowed_weight']
+)->get();
+
+$patients = DB::table('patients')
+->whereNotbetweenColumns(
+    'weight', 
+    ['minimum_allowed_weight', 'maximum_aloowedweight']
+    ->get()[]
+)
+```
+
+### `whereFullText()`
+
+```php
+$cars = Car::whereFullText('description', 'bmw')->get();
+```
+
+### multiple where grouping
+
+```php
+Car::where('year', '>=', 2010)
+->where('price', '>', 10000)
+->orWhere('price', '<', 5000)
+
+/* Generated SQL:
+    select * from `cars`
+    where `year` >= 2010
+    and `price` > 10000 
+    or `price` < 5000
+*/
+
+// is same as
+Car::where('year', '>=', 2010)
+->where(function (Builder $query){
+    $query->where('price', '>', 10000)
+        ->orWhere('price', '<', 5000);
+})
+
+/* Generated SQL:
+    select * from `cars`
+    where `year` >= 2010
+    and (`price` > 10000 or `price` < 5000)
+*/
+```
+
+### `whereExists`
+
+```php
+// select cars that have images
+$carWithImages = Car::whereExists(function ($query){
+    $query->select('id')
+        ->from('car_images')
+        ->whereColumn('car_images.car_id', 'cars.id')
+})->get();
+
+//or
+$carWithImages = Car::whereExists(
+    CarImage::select('id')
+        ->whereColumn('car_images.car_id', 'cars.id')
+)->get();
+
+```
+
+_sql query:_
+
+```sql
+select * from 'cars'
+where exists (
+    select 'id' from 'car_images'
+    where 'car_images'.'car_id' = 'cars'.'id'
+)
+```
+
+### Subquery where clause
+
+```php
+// find sedan cars
+$sedanCars = Car::where(function (Builder $query){
+    $query->select('name')
+        ->from('car_types')
+        ->whereColumn('cars.car_type_id', 'car_types.id')
+        ->limit(1);
+}, '=', 'Sedan')->get();
+
+// The same as
+$subquery = CarType::select('name')
+    ->whereColumn('cars.car_type_id', 'car_types.id')
+    ->limit(1);
+$sedanCars = Car::where($subquery, '=', 'Sedan')->get();
+```
+
+_sql query:_
+
+```sql
+SELECT * FROM `cars`
+WHERE (
+    SELECT `name`
+    FROM `car_types`
+    WHERE `cars`.`car_type_id` = `car_types`.`id`
+    LIMIT 1
+) = `Sedan`
+```
+
+```php
+// select cars which has price average price
+$cars = Car::where('price', '<', function (Builder $query){
+    return $query->selectRaw('AVG(price)')->from('cars')
+})->get();
+```
+
+_sql query:_
+
+```sql
+select * from 'cars'
+where 'price' < (
+    select AVG(price) from 'cars'
+)
+```
+
+### query debuggin
+
+```php
+// dump the query with parameter
+Car::where('price', '>', 10000)->dump();
+
+// dump and die
+Car::where('price', '>', 10000)->dd();
+
+// dump the raw sql, with parameter replaced already
+Car::where('price', '>', 10000)->tosql();
+
+// dump the raw sql, and die
+Car::where('price', '>', 10000)->ddRawSql();
+```
+
+## Pagination
+
+```php
+$cars = $query->paginate(15);
+

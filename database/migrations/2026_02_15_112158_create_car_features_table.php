@@ -11,21 +11,19 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('car_features', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('car_id')->constrained()->onDelete('cascade');
-            $table->boolean('abs')->default(false);
-            $table->boolean('air_conditioning')->default(false);
-            $table->boolean('power_windows')->default(false);
-            $table->boolean('power_door_locks')->default(false);
-            $table->boolean('cruise_control')->default(false);
-            $table->boolean('bluetooth_connectivity')->default(false);
-            $table->boolean('remote_start')->default(false);
-            $table->boolean('gps_navigation')->default(false);
-            $table->boolean('heated_seats')->default(false);
-            $table->boolean('climate_control')->default(false);
-            $table->boolean('rear_parking_sensors')->default(false);
-            $table->boolean('leather_seats')->default(false);
-            $table->timestamps();
+            $table->unsignedBigInteger('car_id')->primary();
+            $table->boolean('abs')->default(0);
+            $table->boolean('air_conditioning')->default(0);
+            $table->boolean('power_windows')->default(0);
+            $table->boolean('power_door_locks')->default(0);
+            $table->boolean('cruise_control')->default(0);
+            $table->boolean('bluetooth_connectivity')->default(0);
+            $table->boolean('remote_start')->default(0);
+            $table->boolean('gps_navigation')->default(0);
+            $table->boolean('heated_seats')->default(0);
+            $table->boolean('climate_control')->default(0);
+            $table->boolean('rear_parking_sensors')->default(0);
+            $table->boolean('leather_seats')->default(0);
         });
     }
 

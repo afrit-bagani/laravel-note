@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CarFeatures extends Model
 {
+    use HasFactory;
     public $timestamps = false;
 
-    // protected $primaryKey = 'car_id';
+    protected $primaryKey = 'car_id';
 
     protected $fillable = [
         'car_id',
@@ -23,7 +25,11 @@ class CarFeatures extends Model
         'gps_navigation',
         'heated_seats',
         'climate_control',
+        'rear_parking_sensors',
+        'leather_seats',
     ];
+
+
 
     public function car(): BelongsTo
     {

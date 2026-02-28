@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -17,7 +18,7 @@ class Car extends Model
     protected $fillable = [
         'maker_id',
         'model_id',
-        'years',
+        'year',
         'price',
         'vin',
         'mileage',
@@ -54,7 +55,6 @@ class Car extends Model
     public function model(): BelongsTo
     {
         return $this->belongsTo(\App\Models\Model::class);
-
     }
 
     public function owner(): BelongsTo
@@ -93,7 +93,8 @@ class Car extends Model
         );
     }
 
-
-
-
+    public function getCreateDate(): string
+    {
+        return (new Carbon($this->created_at))->format('Y-m-d');
+    }
 }

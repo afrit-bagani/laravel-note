@@ -10,8 +10,9 @@ Route::get('/signup', [SignupController::class, 'signup'])->name('signup');
 Route::get('/login', [SignupController::class, 'create'])->name('login');
 
 Route::get('/car/search', [CarController::class, 'search'])->name('car.search');
+Route::get('/car/watchlist', [CarController::class, 'watchlist'])->name('car.watchlist');
 Route::resource("/car", CarController::class);
 
-Route::fallback(function () {
-    return "Error 404 : Page not found";
-});
+// Route::fallback(function () {
+//     return "Error 404 : Page not found";
+// });

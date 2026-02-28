@@ -2,14 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Maker;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Sequence;
+use App\Models\Car;
+use App\Models\CarType;
+use App\Models\Maker;;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        Maker::factory()->count(5)->hasModels()->create();
+        $cars = Car::with(['primaryImage', 'city', 'maker', 'model',  'carType', 'fuelType'])
+            ->where('published_at', '<', now())
+            ->orderBy('published_at', 'desc')
+            ->limit(30)
+            ->get();
+        $makers = Maker::orderBy('name')->get();
+        $carTypes = CarType::orderBy('name')->get();
+
+        return view('home.index', ['cars' => $cars]);
     }
 }
