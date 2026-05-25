@@ -43,13 +43,13 @@ laravel blade, laravel blade snippet, laraval goto
 
 ## 2. Getting started with laravel project
 
-- `using composer`
+- **`using composer`**
 
 ```bash
 composer create-project laravel/laravel project-name
 ```
 
-- `Using laravel installer` -> (internally it still use `composer`)
+- **`Using laravel installer`** -> (internally it still use `composer`)
 
 ```bash
 composer global require laravel/installer
@@ -61,9 +61,9 @@ then
 laravel new project-name
 ```
 
-- `Using laravel herd`
+- **`Using laravel herd`**
 
-install laravel herd
+Install laravel herd
 
 goto `site`, click on `+` , click `No starter kit`
 
@@ -393,7 +393,7 @@ Route::view("/about", 'about', ['phone' => '1234567890']);
 
 ```php
 Route::get("/product/{id}", function ($id) {
-    return "Product ID= {$id}";
+    return "Product ID = {$id}";
 });
 ```
 
@@ -789,7 +789,7 @@ If your application grows and became very large it is recommended to split it up
 Create single action controller by command
 
 ```bash
-php artisan make:controller [Filename] --invokable
+php artisan make:controller <FileNameController> --invokable
 ```
 
 ```php
@@ -803,7 +803,7 @@ Route::get('/car', CarController::class);
 In Laravel the 'Resource controller' is a special type of controller that provides a convenient way to handle typical CRUD operations for a resource such as database table.
 
 ```bash
-php artisan make:controller [filename] --resource
+php artisan make:controller <FileNameController> --resource
 ```
 
 In resource controller there are 7 predefine methods.
@@ -856,7 +856,7 @@ Route::apiResource(name: '/products', controller: ProductController::class);
 Or, when you creating controller only for api do this -
 
 ```bash
-php artisan make:controller [filename] --api
+php artisan make:controller <FileNameController> --api
 ```
 
 If you want to create multiple resource controller
@@ -1057,9 +1057,9 @@ It is also possiable to declare a global share data, that data will available to
 
 ```php
 public function boot(): void
-    {
-        View::share('year', date('Y'));
-    }
+{
+    View::share('year', date('Y'));
+}
 ```
 
 `index.blade.php`
@@ -2048,7 +2048,14 @@ There exist spefic attribute for propertise of Anonymous components:
 </div>
 ```
 
+If don't give `@props()` -> passing props will consider as attribute
 advantge => can provide default values, @props() give idea what are all the props.
+
+```php
+<div {{ $attributes->merge(['class' -> 'card']) }}>
+    {{ @slot }}
+</div>
+```
 
 use variable
 
@@ -2298,6 +2305,53 @@ Route::resource('photos', PhotoController::class);
 <form action="{{ route('car.search') }}">
 ```
 
+## section -> Forms
+
+```php
+// web.php
+Route::post('/ideas', function(){
+    dd('Hello');
+})
+
+// view file
+<form method="POST" action='/ideas'>
+    <label for='ideas'>Write your ideas</label>
+    <textarea></textarea>
+    <button type='submit'>Submit</button
+</form>
+
+// under the hood it create <input type='hidden' name='_token' value='unique value that will match with server side token'>
+```
+
+It will show-> 419 | Page expired
+
+Solution
+
+```php
+<form method="POST" action='/ideas'>
+    @csrf
+    <label for='ideas'>Write your ideas</label>
+    <textarea></textarea>
+    <button type='submit'>Submit</button
+</form>
+```
+
+## method spoofing
+
+Method spoofing (or HTTP method spoofing) is a technique used in web development to simulate HTTP verbs that are not natively supported by standard HTML forms, such as PUT, PATCH, or DELETE.
+
+```php
+<form action="/update-resource" method="POST">
+    <!-- This hidden field tells the server to treat the POST as a PUT -->
+    <input type="hidden" name="_method" value="PUT">
+    
+    <!-- Standard CSRF protection is still required -->
+    <input type="hidden" name="_token" value="your-csrf-token">
+    
+    <button type="submit">Update</button>
+</form>
+```
+
 ## 10. Introductions to DataBase
 
 ### 10.1 Database Coonfiguration
@@ -2401,8 +2455,15 @@ Eloquent is laravel's built in library.
 
 ### 12.2 Generate Model with Artisan
 
+Model name is usually Singular.
+
 ```bash
 php artisan make:model FuelType
+```
+
+```php
+// FuelType model
+protected guarded = [] // model no need guarded anything
 ```
 
 Generate migration file along with model
@@ -2507,14 +2568,14 @@ class Car extends Model
 ```php
 Class CarController extends Controller {
     // BEFORE
-    public function show(string $id)
+    public function show(string $id) //cars/id
     {
         return view('car.show');
     }
 
     //AFTER
     // it expect car instance
-    public function show(Car $car) // Binding controller with model
+    public function show(Car $car) // cars/car
     {
         return view('car.show');
     }
@@ -2752,7 +2813,7 @@ Car::where('published_at', null)
     ->update(['published_at' => now()]);
 ```
 
-### 12.11 Delete a Single Record
+### 12.12 Delete a Single Record
 
 #### Method 1: Soft Delete
 
@@ -2816,6 +2877,8 @@ You are talking directly to **PostgreSQL**. You are setting a hard rule inside t
 When you write this in your Model:
 
 ```php
+// PostModel.php
+
 public function user() {
     return $this->belongsTo(User::class);
 }
@@ -2925,10 +2988,20 @@ $query = $car->features();
 $activeFeatures = $query->where('is_active', true)->get();
 ```
 
+Warning -> Property accessed via magic method.
+
+Solution ->
+
+```php
+/*
+* @property-read Collection<int, Model_Name> $property_name
+/
+```
+
 ### 13.2 One-to-many Relationship
 
 ```php
-// Model
+// CarModel
 public function images(): HasMany
 {
     return $this->hasMany(CarImage::class);
@@ -3152,6 +3225,104 @@ Most Laravel teams (and the official documentation examples) tend to follow this
 6. Helper Methods (isAdmin())
 
 ---
+
+## new section: Auth
+
+### Authorization using Gate
+
+```php
+// Provider/AppServiceProvider
+
+public function boot: void
+{
+    Gate::define('/view-admin', function(User $user){
+        return $user->role === 'admin';
+    })
+}
+
+//using authorization
+
+@can('/view-admin') // @can under the hood using if-else logic
+ <li>Admin</li>
+@endcan
+
+// at route level
+Route::get('/admin', function(){
+    // code
+})->can('/view-admin');
+
+// at controller level
+Route::get('/admin', function(){
+    Gate::authorize('/can-admin');
+})
+
+// by deafult gate want authorised user, but if want to just test application
+public function boot: void
+{
+    Gate::define('/view-admin', function(?User $user){
+        return true;
+    })
+}
+```
+
+If you want to send 404 status code instead of 403 for security reason
+
+```php
+public function boot: void
+{
+    Gate::define('/view-admin', function(User $user){
+        if ( $user->role === 'admin') {
+            return Response::allow();  //Response -> auth/access
+        }
+        return Response::denyAsnotFound();
+
+        //or 
+        return $user->isAdmin ?  Response::allow() : Response::denyAsnotFound();
+    })
+}
+```
+
+---
+
+### Authorization using policy
+
+```bash
+php artisan make:policy <policy_name> // IdeaPolicy
+```
+
+```php
+// App/Policy/IdeaPolicy.php
+public function update(User $user, Idea $idea) {
+    return $user->id === $idea->user_id ? return Response::allow : Reseponse::deny('You are not allowed');
+
+    // or (another method using is)
+    return $user->is($idea->user_id);
+}
+
+// IdeaController -> show()
+public fucntion show(Idea $idea){
+    Gate::authorize('update', $idea);
+}
+
+// behind authorise laravel doing this 
+Auth::user()->can('/update', $idea);
+```
+
+where particular reference Model is not available ->
+
+```php
+// controller
+public function create() {
+    Gate::authorize('create', Idea::class); // Idea is provide through paramas
+}
+
+// App/policy/IdeaPolicy
+public function create(User $user) {
+    return $user->isAdmin();
+}
+```
+
+use gate for any route or controller, use policy when you have to authorize any resource.
 
 ## 14 Factories
 
@@ -4050,4 +4221,242 @@ Car::where('price', '>', 10000)->ddRawSql();
 
 ```php
 $cars = $query->paginate(15);
+```
 
+_Render Pagination:_
+
+```php
+// 1st method
+{{ $cars->links('pagination') }} // you pass the pagination name
+
+// 2nd method (define default view)
+public function boot(): void
+{
+    Paginator::defaultView('pagination');
+}
+
+// 3rd method
+php artisan vendor:publish --tag=laravel-pagination
+```
+
+## MONDAY
+
+There also exist `simplePagination` that have only previous and next link, it is light weight, and does't have `total()` method.
+
+```php
+public function index()
+{
+    $cars = User::findOrFail(1)
+        ->cars() ->cars()
+        ->with(['primaryImage', 'model', 'maker'])
+        ->orderBy('created_at', 'desc')
+        ->simplePaginate(15);
+
+    return view('car.index', compact(['cars']));
+}
+
+// deafult view file
+public function boot(): void{
+    Paginator::defaultSimpleView(view: 'simple-pagination');
+}
+```
+
+### Customize Pagination URLs
+
+- `withPath()`
+
+If we want to link pagination button into different page =>
+
+```php
+$cars = User::find(1)
+    ->cars()
+    ->paginate(10)
+    ->withPath('/user/cars'); // now it will goto /user/cars?page=n
+```
+
+- `appends()`
+
+```php
+$cars = User::find(1)
+    ->cars()
+    ->paginate(10) 
+    ->appends(['sort' => 'price']) // url => localhost:8000/car?sort=price&page=4 
+```
+
+- `withQueryString()`: It preserves other query string.
+
+```php
+$cars = User::find(1)
+    ->paginate(10)
+    ->withQueryString();
+```
+
+- `fragment()`
+
+```php
+$cars = User::find(1)
+    ->paginate(10)
+    ->withQueryString()
+    ->fragment('cars'); // url => localhost:8000/car?page=4#cars 
+```
+
+## Request $ Response
+
+### Accessing the Request
+
+We can accesss request object in two ways -
+
+```php
+public function index(Request $request)
+{
+    dd($request);
+}
+
+// or
+public function index()
+{
+    dd(request());
+}
+```
+
+### Request Methods
+
+```php
+// Give the current path
+$request->path();
+
+// give url, no query string
+$request->url();
+
+// Get the full url for the request
+$request->fullUrl();
+
+// Give the method
+$request->method();
+
+// check specific REST method
+$request->isMethod('post');
+
+// Returns true if the request is an XMLHttpRequest(AJAX).
+/** It works if your JavaScript library sets an X-Requested-With HTTP header.
+  * It is known to work with common JavaScript
+ */
+$request->isXmlHttpRequest(); 
+
+// If the request URL matches the pattern (check path)
+if($request->is('admin/*')){
+    // code
+}
+
+// If the request URL matches the pattern (check name)
+if($request->routeIs('admin.*')){
+    // code
+}
+
+// If the request expects JSON response
+if($request->expectsJson()){
+    // code
+}
+
+$request->fullUrlWithQuery(['sort' => 'price'])
+// url => http::localhost:8000/car/1?sort=price&page=1
+
+$request->fullUrlWithoutQuery(['sort' => 'price']) // remove specific query params
+// url => http::localhost:8000/car/1?page=1
+
+$request->host() // output: localhost
+$request->httphost() // output: localhost:8000 (host with port number)
+$request->schemeAndHttphost() // output: https://localhost:8000
+
+if($request->header('Content-Type')){
+    // code
+}
+if($request->bearerToken()){
+    // code
+}
+
+$request->ip() // output: 127.0.0.1
+```
+
+### Creating Response
+
+_We can return response:_
+
+```php
+// return string 
+public function index()
+{
+    return 'HELLO';
+}
+
+// return array 
+public function index()
+{
+    $arr = []
+    return $arr;
+}
+
+// return model 
+public function index()
+{
+   return Car::get();
+}
+
+// return content with status code 
+public function index()
+{
+   return response('Resource create', 201);
+}
+
+// return header
+public function index()
+{
+   return response('Resource create', 201)
+       ->header('Header 1', 'Value 1')
+       ->header('Header 2', 'Value 2');
+}
+
+// return JSON data
+public function index()
+{
+   return response('Resource create', 201)
+       ->json([1, 2, 3, 4, 5])
+       ->header('Header 1', 'Value 1')
+       ->header('Header 2', 'Value 2');
+   
+   // or
+   return response('Resource create', 201)
+       ->json([1, 2, 3, 4, 5])
+       ->withHeaders([
+        'Header 1' => 'Value 1', 
+        'Header 2' => 'Value 2'
+       ])
+}
+
+// return view, data, status code
+public function index()
+{
+   return response()->view(view: 'view-file-name', data: $data, status: 201)
+       ->header('Header 1', 'Value 1');
+}
+```
+
+### Redirects
+
+```php
+public function index()
+{
+    return redirect('/car/create');
+
+    // or
+    return redirect()->route('car.create');
+
+    // if we want to redirect user to an url, which require params
+    return redirect()->route('car.show', ['car' => 1]);
+    // or
+    return redirect()->route('car.show', Car::first());
+
+    // redirect to an external url
+    return redirect()->away('https://laravel.com');
+}
+```

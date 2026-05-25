@@ -15,8 +15,6 @@ class HomeController extends Controller
             ->orderBy('published_at', 'desc')
             ->limit(30)
             ->get();
-        $makers = Maker::orderBy('name')->get();
-        $carTypes = CarType::orderBy('name')->get();
 
         return view('home.index', ['cars' => $cars]);
     }

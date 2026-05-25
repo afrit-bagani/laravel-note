@@ -13,13 +13,14 @@ class CarController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $cars = User::with(['primaryImage', 'model', 'maker'])->findOrFail(5)
-            ->findOrFail(5)
+        $cars = User::findOrFail(1)
             ->cars()
+            ->with(['primaryImage', 'model', 'maker'])
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(10)
+            ->appends(['sort' => 'price']);
 
         return view('car.index', compact(['cars']));
     }
@@ -43,8 +44,9 @@ class CarController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Car $car)
+    public function show(Request $request, Car $car)
     {
+
         return view('car.show', ['car' => $car]);
     }
 
@@ -83,7 +85,7 @@ class CarController extends Controller
 
         $query->select('cars.*', 'cities.name as city_name');
 
-        $cars = $query->paginate(15);
+        $cars = $query->paginate(5);
 
         return view('car.search', compact('cars'));
     }
@@ -99,7 +101,7 @@ class CarController extends Controller
                 'carType',
                 'fuelType'
             ])
-            ->get();
+            ->paginate(15);
 
         return view('car.watchlist', ['cars' => $cars]);
     }

@@ -13,16 +13,16 @@ return new class extends Migration
     {
         Schema::create('cars', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('maker_id')->constrained()->nullOnDelete();
-            $table->foreignId('model_id')->constrained()->nullOnDelete();
+            $table->foreignId('maker_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('model_id')->constrained()->cascadeOnDelete();
             $table->integer('year')->nullable();
             $table->integer('price');
             $table->string('vin');
             $table->integer('mileage');
-            $table->foreignId('car_type_id')->constrained()->nullOnDelete();
-            $table->foreignId('fuel_type_id')->constrained()->nullOnDelete();
-            $table->foreignId('user_id')->constrained()->nullOnDelete();
-            $table->foreignId('city_id')->constrained()->nullOnDelete();
+            $table->foreignId('car_type_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('fuel_type_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('city_id')->constrained()->cascadeOnDelete();
             $table->string('address', 255);
             $table->string('phone', 45);
             $table->longText('description')->nullable();
