@@ -83,10 +83,11 @@ class CarController extends Controller
 
         $query->select('cars.*', 'cities.name as city_name');
 
-        $cars = $query->paginate(9);
+        $cars = $query->paginate(5);
 
         return view('car.search', compact('cars'));
     }
+
     public function watchlist()
     {
         $cars = User::findOrFail(4)

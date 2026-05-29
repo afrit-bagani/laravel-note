@@ -3434,7 +3434,7 @@ php artisan migrate --seed
 
 ```php
 User::factory()->create([
-    'name' => 'Tester User', 
+    'name' => 'Tester User',
     'email' => 'test@example.com',
 ]);
 
@@ -3477,8 +3477,8 @@ $car = Car::first();
 $highestPrice = Car::orderBy('price', 'desc')->value('price');
 
 // get list of values from from column
-$prices = Car::orderBy('price', 'desc')->pluck('price'); // array 
-$prices = Car::orderBy('price', 'desc')->pluck('price', 'id'); // associat array 
+$prices = Car::orderBy('price', 'desc')->pluck('price'); // array
+$prices = Car::orderBy('price', 'desc')->pluck('price', 'id'); // associat array
 
 // check specific user does't have car
 if(Car::where('user_id', 1)->exists()){
@@ -3498,7 +3498,7 @@ $cars = Car::select('vin', 'price')->get();
 $cars = Car::select('vin', 'price as car_price')->get();
 
 // add another column in select at later stage
-$cars_with_mileage = $car->addSelect('mileage')->get(); 
+$cars_with_mileage = $car->addSelect('mileage')->get();
 ```
 
 **Select distinct record:**
@@ -3561,12 +3561,12 @@ Car::orderBy('published_at', 'desc')
 ```php
 $cars = Car::latest()->get();
 
-// The same as 
+// The same as
 $cars = Car::orderBy('created_at', 'desc')->get();
 
 $cars = Car::oldest()->get();
 
-// The same as 
+// The same as
 $cars = Car::orderBy('created_at', 'asc')->get();
 
 // select data in rendom order
@@ -3613,7 +3613,7 @@ select * from 'cities' where 'cities'.'id' = 15 limit 1
 select * from 'cities' where 'cities'.'id' = 21 limit 1
 select * from 'cities' where 'cities'.'id' = 17 limit 1
 select * from 'cities' where 'cities'.'id' = 24 limit 1
-select * from 'cities' where 'cities'.'id' = 15 limit 1 
+select * from 'cities' where 'cities'.'id' = 15 limit 1
 ```
 
 ```php
@@ -3681,7 +3681,7 @@ foreach($cars as $car){
 select * from 'cars' where 'cars'.'deleted_at' is null limit 5
 
 select * from cities where 'cities'.'id' = 15 limit 1 -- it fetch cities, all though I don't need it
-select * from states where 'states'.'id' = 3 limit 1 
+select * from states where 'states'.'id' = 3 limit 1
 -- so on
 ```
 
@@ -3742,10 +3742,10 @@ public function search()
         ->where('published_at', '<', now())
         ->orderBy('published_at', 'desc');
 
-    $states = $query->join('cities', 'cities_id', '=', 'cars.city_id'); 
+    $states = $query->join('cities', 'cities_id', '=', 'cars.city_id');
 
     // filter the data
-    $res = $states->where('city.state_id', 1) 
+    $res = $states->where('city.state_id', 1)
 
     return view('car.search', compact('cars', 'carCount'));
 }
@@ -3754,8 +3754,8 @@ public function search()
 _Use join for optimization:_
 
 ```php
-// here you doing query for city 
-$query = Car::with(['primaryImage', 'city', 'maker', 'model', 'carType', 'fuelType']) 
+// here you doing query for city
+$query = Car::with(['primaryImage', 'city', 'maker', 'model', 'carType', 'fuelType'])
     ->where('published_at', '<', now())
     ->orderBy('published_at', 'desc');
 
@@ -3900,7 +3900,7 @@ $cars = Car::whereIn('users_id', $users)->get();
 ->whereColumn('updated_at', '>', 'created_at')
 
 ->whereColumn([
-    ['column1', '=', 'column2'], 
+    ['column1', '=', 'column2'],
     ['updated_at', '>', 'created_at'],
 ])
 ```
@@ -3910,13 +3910,13 @@ $cars = Car::whereIn('users_id', $users)->get();
 ```php
 $patients = DB::table('patients')
 ->whereBetweenColumns(
-    'weight', 
+    'weight',
     ['minimum_allowed_weight', 'maximum_allowed_weight']
 )->get();
 
 $patients = DB::table('patients')
 ->whereNotbetweenColumns(
-    'weight', 
+    'weight',
     ['minimum_allowed_weight', 'maximum_aloowedweight']
     ->get()[]
 )
@@ -3938,7 +3938,7 @@ Car::where('year', '>=', 2010)
 /* Generated SQL:
     select * from `cars`
     where `year` >= 2010
-    and `price` > 10000 
+    and `price` > 10000
     or `price` < 5000
 */
 
@@ -4050,4 +4050,102 @@ Car::where('price', '>', 10000)->ddRawSql();
 
 ```php
 $cars = $query->paginate(15);
+```
 
+_Several way to customise pagination:_
+
+- Giving view name directly
+
+```php
+{{ $cars->onEachSide(1)->links('pagination') }}
+```
+
+- Using App provider
+
+```php
+public function boot(): void
+{
+    Paginator::defaultView(view: 'pagination');
+}
+```
+
+- Customizing exisiting tailwind css view
+
+```bash
+php artisan vendor:publish --tag=laravel-pagination
+```
+
+👆 it will publish [laravel-pagination] assets to `view/resource/vendor/pagination`
+
+By default use `tailwind.blade.php`
+
+Pagination logic:
+
+```php
+<?php
+/** @var $paginator \Illuminate\Pagination\LengthAwarePaginator */
+?>
+
+@if ($paginator->hasPages())
+    <nav class="pagination my-large">
+
+        {{-- Previous Button Logic --}}
+        @if ($paginator->onFirstPage())
+            <span class="pagination-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                    style="width: 18px">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                </svg>
+            </span>
+        @else
+            <a href="{{ $paginator->previousPageUrl() }}" class="pagination-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                    style="width: 18px">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                </svg>
+            </a>
+        @endif
+
+        {{-- Page Numbers Logic --}}
+        @foreach ($elements as $element)
+            @if (is_string($element))
+                <span class="pagination-item">{{ $element }}</span>
+            @endif
+
+            @if (is_array($element))
+                @foreach ($element as $page => $url)
+                    @if ($page == $paginator->currentPage())
+                        <span class="pagination-item active">{{ $page }}</span>
+                    @else
+                        <a href="{{ $url }}" class="pagination-item">{{ $page }}</a>
+                    @endif
+                @endforeach
+            @endif
+        @endforeach
+
+        {{-- Next Button Logic --}}
+        @if ($paginator->hasMorePages())
+            <a href="{{ $paginator->nextPageUrl() }}" class="pagination-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                    style="width: 18px">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+            </a>
+        @else
+            <span class="pagination-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                    style="width: 18px">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+            </span>
+        @endif
+
+    </nav>
+@endif
+```
+
+### session
+
+session()->push('ideas');
+session()->get('ideas');
+session()->forgot('ideas');
