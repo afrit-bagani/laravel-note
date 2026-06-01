@@ -39,8 +39,6 @@ herd is a single program which combine `php`, `nginix`, `node`, `composer`
 
 laravel blade, laravel blade snippet, laraval goto
 
-<<<<<<< HEAD
-=======
 ### Production env
 
 ```php
@@ -76,26 +74,17 @@ enum Abcstatus: string
 
 ```
 
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 ---
 
 ## 2. Getting started with laravel project
 
-<<<<<<< HEAD
-- **`using composer`**
-=======
 - `using composer`
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 
 ```bash
 composer create-project laravel/laravel project-name
 ```
 
-<<<<<<< HEAD
-- **`Using laravel installer`** -> (internally it still use `composer`)
-=======
 - `Using laravel installer` -> (internally it still use `composer`)
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 
 ```bash
 composer global require laravel/installer
@@ -107,15 +96,9 @@ then
 laravel new project-name
 ```
 
-<<<<<<< HEAD
-- **`Using laravel herd`**
-
-Install laravel herd
-=======
 - `Using laravel herd`
 
 install laravel herd
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 
 goto `site`, click on `+` , click `No starter kit`
 
@@ -445,11 +428,7 @@ Route::view("/about", 'about', ['phone' => '1234567890']);
 
 ```php
 Route::get("/product/{id}", function ($id) {
-<<<<<<< HEAD
-    return "Product ID = {$id}";
-=======
     return "Product ID= {$id}";
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 });
 ```
 
@@ -845,11 +824,7 @@ If your application grows and became very large it is recommended to split it up
 Create single action controller by command
 
 ```bash
-<<<<<<< HEAD
-php artisan make:controller <FileNameController> --invokable
-=======
 php artisan make:controller [Filename] --invokable
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 ```
 
 ```php
@@ -863,11 +838,7 @@ Route::get('/car', CarController::class);
 In Laravel the 'Resource controller' is a special type of controller that provides a convenient way to handle typical CRUD operations for a resource such as database table.
 
 ```bash
-<<<<<<< HEAD
-php artisan make:controller <FileNameController> --resource
-=======
 php artisan make:controller [filename] --resource
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 ```
 
 In resource controller there are 7 predefine methods.
@@ -920,11 +891,7 @@ Route::apiResource(name: '/products', controller: ProductController::class);
 Or, when you creating controller only for api do this -
 
 ```bash
-<<<<<<< HEAD
-php artisan make:controller <FileNameController> --api
-=======
 php artisan make:controller [filename] --api
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 ```
 
 If you want to create multiple resource controller
@@ -1125,15 +1092,9 @@ It is also possiable to declare a global share data, that data will available to
 
 ```php
 public function boot(): void
-<<<<<<< HEAD
-{
-    View::share('year', date('Y'));
-}
-=======
     {
         View::share('year', date('Y'));
     }
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 ```
 
 `index.blade.php`
@@ -2122,20 +2083,8 @@ There exist spefic attribute for propertise of Anonymous components:
 </div>
 ```
 
-<<<<<<< HEAD
-If don't give `@props()` -> passing props will consider as attribute
 advantge => can provide default values, @props() give idea what are all the props.
 
-```php
-<div {{ $attributes->merge(['class' -> 'card']) }}>
-    {{ @slot }}
-</div>
-```
-
-=======
-advantge => can provide default values, @props() give idea what are all the props.
-
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 use variable
 
 ```php
@@ -2384,56 +2333,6 @@ Route::resource('photos', PhotoController::class);
 <form action="{{ route('car.search') }}">
 ```
 
-<<<<<<< HEAD
-## section -> Forms
-
-```php
-// web.php
-Route::post('/ideas', function(){
-    dd('Hello');
-})
-
-// view file
-<form method="POST" action='/ideas'>
-    <label for='ideas'>Write your ideas</label>
-    <textarea></textarea>
-    <button type='submit'>Submit</button
-</form>
-
-// under the hood it create <input type='hidden' name='_token' value='unique value that will match with server side token'>
-```
-
-It will show-> 419 | Page expired
-
-Solution
-
-```php
-<form method="POST" action='/ideas'>
-    @csrf
-    <label for='ideas'>Write your ideas</label>
-    <textarea></textarea>
-    <button type='submit'>Submit</button
-</form>
-```
-
-## method spoofing
-
-Method spoofing (or HTTP method spoofing) is a technique used in web development to simulate HTTP verbs that are not natively supported by standard HTML forms, such as PUT, PATCH, or DELETE.
-
-```php
-<form action="/update-resource" method="POST">
-    <!-- This hidden field tells the server to treat the POST as a PUT -->
-    <input type="hidden" name="_method" value="PUT">
-    
-    <!-- Standard CSRF protection is still required -->
-    <input type="hidden" name="_token" value="your-csrf-token">
-    
-    <button type="submit">Update</button>
-</form>
-```
-
-=======
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 ## 10. Introductions to DataBase
 
 ### 10.1 Database Coonfiguration
@@ -2537,23 +2436,10 @@ Eloquent is laravel's built in library.
 
 ### 12.2 Generate Model with Artisan
 
-<<<<<<< HEAD
-Model name is usually Singular.
-
-=======
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 ```bash
 php artisan make:model FuelType
 ```
 
-<<<<<<< HEAD
-```php
-// FuelType model
-protected guarded = [] // model no need guarded anything
-```
-
-=======
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 Generate migration file along with model
 
 ```bash
@@ -2656,22 +2542,14 @@ class Car extends Model
 ```php
 Class CarController extends Controller {
     // BEFORE
-<<<<<<< HEAD
-    public function show(string $id) //cars/id
-=======
     public function show(string $id)
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
     {
         return view('car.show');
     }
 
     //AFTER
     // it expect car instance
-<<<<<<< HEAD
-    public function show(Car $car) // cars/car
-=======
     public function show(Car $car) // Binding controller with model
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
     {
         return view('car.show');
     }
@@ -2909,11 +2787,7 @@ Car::where('published_at', null)
     ->update(['published_at' => now()]);
 ```
 
-<<<<<<< HEAD
-### 12.12 Delete a Single Record
-=======
 ### 12.11 Delete a Single Record
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 
 #### Method 1: Soft Delete
 
@@ -2977,11 +2851,6 @@ You are talking directly to **PostgreSQL**. You are setting a hard rule inside t
 When you write this in your Model:
 
 ```php
-<<<<<<< HEAD
-// PostModel.php
-
-=======
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 public function user() {
     return $this->belongsTo(User::class);
 }
@@ -3091,27 +2960,10 @@ $query = $car->features();
 $activeFeatures = $query->where('is_active', true)->get();
 ```
 
-<<<<<<< HEAD
-Warning -> Property accessed via magic method.
-
-Solution ->
-
-```php
-/*
-* @property-read Collection<int, Model_Name> $property_name
-/
-```
-
-### 13.2 One-to-many Relationship
-
-```php
-// CarModel
-=======
 ### 13.2 One-to-many Relationship
 
 ```php
 // Model
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 public function images(): HasMany
 {
     return $this->hasMany(CarImage::class);
@@ -3336,107 +3188,6 @@ Most Laravel teams (and the official documentation examples) tend to follow this
 
 ---
 
-<<<<<<< HEAD
-## new section: Auth
-
-### Authorization using Gate
-
-```php
-// Provider/AppServiceProvider
-
-public function boot: void
-{
-    Gate::define('/view-admin', function(User $user){
-        return $user->role === 'admin';
-    })
-}
-
-//using authorization
-
-@can('/view-admin') // @can under the hood using if-else logic
- <li>Admin</li>
-@endcan
-
-// at route level
-Route::get('/admin', function(){
-    // code
-})->can('/view-admin');
-
-// at controller level
-Route::get('/admin', function(){
-    Gate::authorize('/can-admin');
-})
-
-// by deafult gate want authorised user, but if want to just test application
-public function boot: void
-{
-    Gate::define('/view-admin', function(?User $user){
-        return true;
-    })
-}
-```
-
-If you want to send 404 status code instead of 403 for security reason
-
-```php
-public function boot: void
-{
-    Gate::define('/view-admin', function(User $user){
-        if ( $user->role === 'admin') {
-            return Response::allow();  //Response -> auth/access
-        }
-        return Response::denyAsnotFound();
-
-        //or 
-        return $user->isAdmin ?  Response::allow() : Response::denyAsnotFound();
-    })
-}
-```
-
----
-
-### Authorization using policy
-
-```bash
-php artisan make:policy <policy_name> // IdeaPolicy
-```
-
-```php
-// App/Policy/IdeaPolicy.php
-public function update(User $user, Idea $idea) {
-    return $user->id === $idea->user_id ? return Response::allow : Reseponse::deny('You are not allowed');
-
-    // or (another method using is)
-    return $user->is($idea->user_id);
-}
-
-// IdeaController -> show()
-public fucntion show(Idea $idea){
-    Gate::authorize('update', $idea);
-}
-
-// behind authorise laravel doing this 
-Auth::user()->can('/update', $idea);
-```
-
-where particular reference Model is not available ->
-
-```php
-// controller
-public function create() {
-    Gate::authorize('create', Idea::class); // Idea is provide through paramas
-}
-
-// App/policy/IdeaPolicy
-public function create(User $user) {
-    return $user->isAdmin();
-}
-```
-
-use gate for any route or controller, use policy when you have to authorize any resource.
-
-=======
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 ## 14 Factories
 
 ---
@@ -3718,11 +3469,7 @@ php artisan migrate --seed
 
 ```php
 User::factory()->create([
-<<<<<<< HEAD
-    'name' => 'Tester User', 
-=======
     'name' => 'Tester User',
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
     'email' => 'test@example.com',
 ]);
 
@@ -3765,13 +3512,8 @@ $car = Car::first();
 $highestPrice = Car::orderBy('price', 'desc')->value('price');
 
 // get list of values from from column
-<<<<<<< HEAD
-$prices = Car::orderBy('price', 'desc')->pluck('price'); // array 
-$prices = Car::orderBy('price', 'desc')->pluck('price', 'id'); // associat array 
-=======
 $prices = Car::orderBy('price', 'desc')->pluck('price'); // array
 $prices = Car::orderBy('price', 'desc')->pluck('price', 'id'); // associat array
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 
 // check specific user does't have car
 if(Car::where('user_id', 1)->exists()){
@@ -3791,11 +3533,7 @@ $cars = Car::select('vin', 'price')->get();
 $cars = Car::select('vin', 'price as car_price')->get();
 
 // add another column in select at later stage
-<<<<<<< HEAD
-$cars_with_mileage = $car->addSelect('mileage')->get(); 
-=======
 $cars_with_mileage = $car->addSelect('mileage')->get();
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 ```
 
 **Select distinct record:**
@@ -3858,20 +3596,12 @@ Car::orderBy('published_at', 'desc')
 ```php
 $cars = Car::latest()->get();
 
-<<<<<<< HEAD
-// The same as 
-=======
 // The same as
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 $cars = Car::orderBy('created_at', 'desc')->get();
 
 $cars = Car::oldest()->get();
 
-<<<<<<< HEAD
-// The same as 
-=======
 // The same as
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 $cars = Car::orderBy('created_at', 'asc')->get();
 
 // select data in rendom order
@@ -3918,11 +3648,7 @@ select * from 'cities' where 'cities'.'id' = 15 limit 1
 select * from 'cities' where 'cities'.'id' = 21 limit 1
 select * from 'cities' where 'cities'.'id' = 17 limit 1
 select * from 'cities' where 'cities'.'id' = 24 limit 1
-<<<<<<< HEAD
-select * from 'cities' where 'cities'.'id' = 15 limit 1 
-=======
 select * from 'cities' where 'cities'.'id' = 15 limit 1
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 ```
 
 ```php
@@ -3990,11 +3716,7 @@ foreach($cars as $car){
 select * from 'cars' where 'cars'.'deleted_at' is null limit 5
 
 select * from cities where 'cities'.'id' = 15 limit 1 -- it fetch cities, all though I don't need it
-<<<<<<< HEAD
-select * from states where 'states'.'id' = 3 limit 1 
-=======
 select * from states where 'states'.'id' = 3 limit 1
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 -- so on
 ```
 
@@ -4055,17 +3777,10 @@ public function search()
         ->where('published_at', '<', now())
         ->orderBy('published_at', 'desc');
 
-<<<<<<< HEAD
-    $states = $query->join('cities', 'cities_id', '=', 'cars.city_id'); 
-
-    // filter the data
-    $res = $states->where('city.state_id', 1) 
-=======
     $states = $query->join('cities', 'cities_id', '=', 'cars.city_id');
 
     // filter the data
     $res = $states->where('city.state_id', 1)
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 
     return view('car.search', compact('cars', 'carCount'));
 }
@@ -4074,13 +3789,8 @@ public function search()
 _Use join for optimization:_
 
 ```php
-<<<<<<< HEAD
-// here you doing query for city 
-$query = Car::with(['primaryImage', 'city', 'maker', 'model', 'carType', 'fuelType']) 
-=======
 // here you doing query for city
 $query = Car::with(['primaryImage', 'city', 'maker', 'model', 'carType', 'fuelType'])
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
     ->where('published_at', '<', now())
     ->orderBy('published_at', 'desc');
 
@@ -4225,11 +3935,7 @@ $cars = Car::whereIn('users_id', $users)->get();
 ->whereColumn('updated_at', '>', 'created_at')
 
 ->whereColumn([
-<<<<<<< HEAD
-    ['column1', '=', 'column2'], 
-=======
     ['column1', '=', 'column2'],
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
     ['updated_at', '>', 'created_at'],
 ])
 ```
@@ -4239,21 +3945,13 @@ $cars = Car::whereIn('users_id', $users)->get();
 ```php
 $patients = DB::table('patients')
 ->whereBetweenColumns(
-<<<<<<< HEAD
-    'weight', 
-=======
     'weight',
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
     ['minimum_allowed_weight', 'maximum_allowed_weight']
 )->get();
 
 $patients = DB::table('patients')
 ->whereNotbetweenColumns(
-<<<<<<< HEAD
-    'weight', 
-=======
     'weight',
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
     ['minimum_allowed_weight', 'maximum_aloowedweight']
     ->get()[]
 )
@@ -4275,11 +3973,7 @@ Car::where('year', '>=', 2010)
 /* Generated SQL:
     select * from `cars`
     where `year` >= 2010
-<<<<<<< HEAD
-    and `price` > 10000 
-=======
     and `price` > 10000
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
     or `price` < 5000
 */
 
@@ -4393,245 +4087,6 @@ Car::where('price', '>', 10000)->ddRawSql();
 $cars = $query->paginate(15);
 ```
 
-<<<<<<< HEAD
-_Render Pagination:_
-
-```php
-// 1st method
-{{ $cars->links('pagination') }} // you pass the pagination name
-
-// 2nd method (define default view)
-public function boot(): void
-{
-    Paginator::defaultView('pagination');
-}
-
-// 3rd method
-php artisan vendor:publish --tag=laravel-pagination
-```
-
-## MONDAY
-
-There also exist `simplePagination` that have only previous and next link, it is light weight, and does't have `total()` method.
-
-```php
-public function index()
-{
-    $cars = User::findOrFail(1)
-        ->cars() ->cars()
-        ->with(['primaryImage', 'model', 'maker'])
-        ->orderBy('created_at', 'desc')
-        ->simplePaginate(15);
-
-    return view('car.index', compact(['cars']));
-}
-
-// deafult view file
-public function boot(): void{
-    Paginator::defaultSimpleView(view: 'simple-pagination');
-}
-```
-
-### Customize Pagination URLs
-
-- `withPath()`
-
-If we want to link pagination button into different page =>
-
-```php
-$cars = User::find(1)
-    ->cars()
-    ->paginate(10)
-    ->withPath('/user/cars'); // now it will goto /user/cars?page=n
-```
-
-- `appends()`
-
-```php
-$cars = User::find(1)
-    ->cars()
-    ->paginate(10) 
-    ->appends(['sort' => 'price']) // url => localhost:8000/car?sort=price&page=4 
-```
-
-- `withQueryString()`: It preserves other query string.
-
-```php
-$cars = User::find(1)
-    ->paginate(10)
-    ->withQueryString();
-```
-
-- `fragment()`
-
-```php
-$cars = User::find(1)
-    ->paginate(10)
-    ->withQueryString()
-    ->fragment('cars'); // url => localhost:8000/car?page=4#cars 
-```
-
-## Request $ Response
-
-### Accessing the Request
-
-We can accesss request object in two ways -
-
-```php
-public function index(Request $request)
-{
-    dd($request);
-}
-
-// or
-public function index()
-{
-    dd(request());
-}
-```
-
-### Request Methods
-
-```php
-// Give the current path
-$request->path();
-
-// give url, no query string
-$request->url();
-
-// Get the full url for the request
-$request->fullUrl();
-
-// Give the method
-$request->method();
-
-// check specific REST method
-$request->isMethod('post');
-
-// Returns true if the request is an XMLHttpRequest(AJAX).
-/** It works if your JavaScript library sets an X-Requested-With HTTP header.
-  * It is known to work with common JavaScript
- */
-$request->isXmlHttpRequest(); 
-
-// If the request URL matches the pattern (check path)
-if($request->is('admin/*')){
-    // code
-}
-
-// If the request URL matches the pattern (check name)
-if($request->routeIs('admin.*')){
-    // code
-}
-
-// If the request expects JSON response
-if($request->expectsJson()){
-    // code
-}
-
-$request->fullUrlWithQuery(['sort' => 'price'])
-// url => http::localhost:8000/car/1?sort=price&page=1
-
-$request->fullUrlWithoutQuery(['sort' => 'price']) // remove specific query params
-// url => http::localhost:8000/car/1?page=1
-
-$request->host() // output: localhost
-$request->httphost() // output: localhost:8000 (host with port number)
-$request->schemeAndHttphost() // output: https://localhost:8000
-
-if($request->header('Content-Type')){
-    // code
-}
-if($request->bearerToken()){
-    // code
-}
-
-$request->ip() // output: 127.0.0.1
-```
-
-### Creating Response
-
-_We can return response:_
-
-```php
-// return string 
-public function index()
-{
-    return 'HELLO';
-}
-
-// return array 
-public function index()
-{
-    $arr = []
-    return $arr;
-}
-
-// return model 
-public function index()
-{
-   return Car::get();
-}
-
-// return content with status code 
-public function index()
-{
-   return response('Resource create', 201);
-}
-
-// return header
-public function index()
-{
-   return response('Resource create', 201)
-       ->header('Header 1', 'Value 1')
-       ->header('Header 2', 'Value 2');
-}
-
-// return JSON data
-public function index()
-{
-   return response('Resource create', 201)
-       ->json([1, 2, 3, 4, 5])
-       ->header('Header 1', 'Value 1')
-       ->header('Header 2', 'Value 2');
-   
-   // or
-   return response('Resource create', 201)
-       ->json([1, 2, 3, 4, 5])
-       ->withHeaders([
-        'Header 1' => 'Value 1', 
-        'Header 2' => 'Value 2'
-       ])
-}
-
-// return view, data, status code
-public function index()
-{
-   return response()->view(view: 'view-file-name', data: $data, status: 201)
-       ->header('Header 1', 'Value 1');
-}
-```
-
-### Redirects
-
-```php
-public function index()
-{
-    return redirect('/car/create');
-
-    // or
-    return redirect()->route('car.create');
-
-    // if we want to redirect user to an url, which require params
-    return redirect()->route('car.show', ['car' => 1]);
-    // or
-    return redirect()->route('car.show', Car::first());
-
-    // redirect to an external url
-    return redirect()->away('https://laravel.com');
-}
-```
-=======
 _Several way to customise pagination:_
 
 - Giving view name directly
@@ -4729,4 +4184,3 @@ Pagination logic:
 session()->push('ideas');
 session()->get('ideas');
 session()->forgot('ideas');
->>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
