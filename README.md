@@ -39,6 +39,41 @@ herd is a single program which combine `php`, `nginix`, `node`, `composer`
 
 laravel blade, laravel blade snippet, laraval goto
 
+### Production env
+
+```php
+// App/Providers/AppServiceProvider.php
+use Illuminate\Database\Eloquent\Model;
+
+public function boot() {
+    Model::unguard();
+    Model::shouldBeStrict();
+    Model::automaticallyEagerLoadRelationships();
+}
+```
+
+Setting enum
+
+```php
+php artisan make:enum
+
+// Model abc
+
+protected $cast = [
+    'status': AbcStatus::class // Abc is a model
+]
+
+//AbcStatus
+
+enum Abcstatus: string
+{
+    case 'PENDING' = 'pending', 
+    case 'IN_PROGRESS' = 'in_progress', 
+    case 'COMPLETED' = 'completed',
+} 
+
+```
+
 ---
 
 ## 2. Getting started with laravel project
