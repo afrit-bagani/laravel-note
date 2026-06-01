@@ -13,6 +13,7 @@ class CarController extends Controller
     /**
      * Display a listing of the resource.
      */
+<<<<<<< HEAD
     public function index(Request $request)
     {
         $cars = User::findOrFail(1)
@@ -21,6 +22,15 @@ class CarController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10)
             ->appends(['sort' => 'price']);
+=======
+    public function index()
+    {
+        $cars = User::with(['primaryImage', 'model', 'maker'])->findOrFail(5)
+            ->findOrFail(5)
+            ->cars()
+            ->orderBy('created_at', 'desc')
+            ->get();
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 
         return view('car.index', compact(['cars']));
     }
@@ -44,9 +54,14 @@ class CarController extends Controller
     /**
      * Display the specified resource.
      */
+<<<<<<< HEAD
     public function show(Request $request, Car $car)
     {
 
+=======
+    public function show(Car $car)
+    {
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
         return view('car.show', ['car' => $car]);
     }
 
@@ -89,6 +104,10 @@ class CarController extends Controller
 
         return view('car.search', compact('cars'));
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
     public function watchlist()
     {
         $cars = User::findOrFail(4)
@@ -101,7 +120,11 @@ class CarController extends Controller
                 'carType',
                 'fuelType'
             ])
+<<<<<<< HEAD
             ->paginate(15);
+=======
+            ->get();
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 
         return view('car.watchlist', ['cars' => $cars]);
     }

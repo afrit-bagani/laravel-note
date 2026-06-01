@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 @props(['title' => '', 'bodyClass' => ''])
+=======
+@props(['title' => ''])
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -26,7 +30,11 @@
     <!-- <link rel="stylesheet" href="css/output.css" /> -->
 </head>
 
+<<<<<<< HEAD
 <body class="{{ $bodyClass }}">
+=======
+<body>
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 
     {{ $slot }}
 

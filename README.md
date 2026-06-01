@@ -39,17 +39,63 @@ herd is a single program which combine `php`, `nginix`, `node`, `composer`
 
 laravel blade, laravel blade snippet, laraval goto
 
+<<<<<<< HEAD
+=======
+### Production env
+
+```php
+// App/Providers/AppServiceProvider.php
+use Illuminate\Database\Eloquent\Model;
+
+public function boot() {
+    Model::unguard();
+    Model::shouldBeStrict();
+    Model::automaticallyEagerLoadRelationships();
+}
+```
+
+Setting enum
+
+```php
+php artisan make:enum
+
+// Model abc
+
+protected $cast = [
+    'status': AbcStatus::class // Abc is a model
+]
+
+//AbcStatus
+
+enum Abcstatus: string
+{
+    case 'PENDING' = 'pending', 
+    case 'IN_PROGRESS' = 'in_progress', 
+    case 'COMPLETED' = 'completed',
+} 
+
+```
+
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 ---
 
 ## 2. Getting started with laravel project
 
+<<<<<<< HEAD
 - **`using composer`**
+=======
+- `using composer`
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 
 ```bash
 composer create-project laravel/laravel project-name
 ```
 
+<<<<<<< HEAD
 - **`Using laravel installer`** -> (internally it still use `composer`)
+=======
+- `Using laravel installer` -> (internally it still use `composer`)
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 
 ```bash
 composer global require laravel/installer
@@ -61,9 +107,15 @@ then
 laravel new project-name
 ```
 
+<<<<<<< HEAD
 - **`Using laravel herd`**
 
 Install laravel herd
+=======
+- `Using laravel herd`
+
+install laravel herd
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 
 goto `site`, click on `+` , click `No starter kit`
 
@@ -393,7 +445,11 @@ Route::view("/about", 'about', ['phone' => '1234567890']);
 
 ```php
 Route::get("/product/{id}", function ($id) {
+<<<<<<< HEAD
     return "Product ID = {$id}";
+=======
+    return "Product ID= {$id}";
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 });
 ```
 
@@ -789,7 +845,11 @@ If your application grows and became very large it is recommended to split it up
 Create single action controller by command
 
 ```bash
+<<<<<<< HEAD
 php artisan make:controller <FileNameController> --invokable
+=======
+php artisan make:controller [Filename] --invokable
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 ```
 
 ```php
@@ -803,7 +863,11 @@ Route::get('/car', CarController::class);
 In Laravel the 'Resource controller' is a special type of controller that provides a convenient way to handle typical CRUD operations for a resource such as database table.
 
 ```bash
+<<<<<<< HEAD
 php artisan make:controller <FileNameController> --resource
+=======
+php artisan make:controller [filename] --resource
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 ```
 
 In resource controller there are 7 predefine methods.
@@ -856,7 +920,11 @@ Route::apiResource(name: '/products', controller: ProductController::class);
 Or, when you creating controller only for api do this -
 
 ```bash
+<<<<<<< HEAD
 php artisan make:controller <FileNameController> --api
+=======
+php artisan make:controller [filename] --api
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 ```
 
 If you want to create multiple resource controller
@@ -1057,9 +1125,15 @@ It is also possiable to declare a global share data, that data will available to
 
 ```php
 public function boot(): void
+<<<<<<< HEAD
 {
     View::share('year', date('Y'));
 }
+=======
+    {
+        View::share('year', date('Y'));
+    }
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 ```
 
 `index.blade.php`
@@ -2048,6 +2122,7 @@ There exist spefic attribute for propertise of Anonymous components:
 </div>
 ```
 
+<<<<<<< HEAD
 If don't give `@props()` -> passing props will consider as attribute
 advantge => can provide default values, @props() give idea what are all the props.
 
@@ -2057,6 +2132,10 @@ advantge => can provide default values, @props() give idea what are all the prop
 </div>
 ```
 
+=======
+advantge => can provide default values, @props() give idea what are all the props.
+
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 use variable
 
 ```php
@@ -2305,6 +2384,7 @@ Route::resource('photos', PhotoController::class);
 <form action="{{ route('car.search') }}">
 ```
 
+<<<<<<< HEAD
 ## section -> Forms
 
 ```php
@@ -2352,6 +2432,8 @@ Method spoofing (or HTTP method spoofing) is a technique used in web development
 </form>
 ```
 
+=======
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 ## 10. Introductions to DataBase
 
 ### 10.1 Database Coonfiguration
@@ -2455,17 +2537,23 @@ Eloquent is laravel's built in library.
 
 ### 12.2 Generate Model with Artisan
 
+<<<<<<< HEAD
 Model name is usually Singular.
 
+=======
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 ```bash
 php artisan make:model FuelType
 ```
 
+<<<<<<< HEAD
 ```php
 // FuelType model
 protected guarded = [] // model no need guarded anything
 ```
 
+=======
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 Generate migration file along with model
 
 ```bash
@@ -2568,14 +2656,22 @@ class Car extends Model
 ```php
 Class CarController extends Controller {
     // BEFORE
+<<<<<<< HEAD
     public function show(string $id) //cars/id
+=======
+    public function show(string $id)
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
     {
         return view('car.show');
     }
 
     //AFTER
     // it expect car instance
+<<<<<<< HEAD
     public function show(Car $car) // cars/car
+=======
+    public function show(Car $car) // Binding controller with model
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
     {
         return view('car.show');
     }
@@ -2813,7 +2909,11 @@ Car::where('published_at', null)
     ->update(['published_at' => now()]);
 ```
 
+<<<<<<< HEAD
 ### 12.12 Delete a Single Record
+=======
+### 12.11 Delete a Single Record
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 
 #### Method 1: Soft Delete
 
@@ -2877,8 +2977,11 @@ You are talking directly to **PostgreSQL**. You are setting a hard rule inside t
 When you write this in your Model:
 
 ```php
+<<<<<<< HEAD
 // PostModel.php
 
+=======
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 public function user() {
     return $this->belongsTo(User::class);
 }
@@ -2988,6 +3091,7 @@ $query = $car->features();
 $activeFeatures = $query->where('is_active', true)->get();
 ```
 
+<<<<<<< HEAD
 Warning -> Property accessed via magic method.
 
 Solution ->
@@ -3002,6 +3106,12 @@ Solution ->
 
 ```php
 // CarModel
+=======
+### 13.2 One-to-many Relationship
+
+```php
+// Model
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 public function images(): HasMany
 {
     return $this->hasMany(CarImage::class);
@@ -3226,6 +3336,7 @@ Most Laravel teams (and the official documentation examples) tend to follow this
 
 ---
 
+<<<<<<< HEAD
 ## new section: Auth
 
 ### Authorization using Gate
@@ -3324,6 +3435,8 @@ public function create(User $user) {
 
 use gate for any route or controller, use policy when you have to authorize any resource.
 
+=======
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 ## 14 Factories
 
 ---
@@ -3605,7 +3718,11 @@ php artisan migrate --seed
 
 ```php
 User::factory()->create([
+<<<<<<< HEAD
     'name' => 'Tester User', 
+=======
+    'name' => 'Tester User',
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
     'email' => 'test@example.com',
 ]);
 
@@ -3648,8 +3765,13 @@ $car = Car::first();
 $highestPrice = Car::orderBy('price', 'desc')->value('price');
 
 // get list of values from from column
+<<<<<<< HEAD
 $prices = Car::orderBy('price', 'desc')->pluck('price'); // array 
 $prices = Car::orderBy('price', 'desc')->pluck('price', 'id'); // associat array 
+=======
+$prices = Car::orderBy('price', 'desc')->pluck('price'); // array
+$prices = Car::orderBy('price', 'desc')->pluck('price', 'id'); // associat array
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 
 // check specific user does't have car
 if(Car::where('user_id', 1)->exists()){
@@ -3669,7 +3791,11 @@ $cars = Car::select('vin', 'price')->get();
 $cars = Car::select('vin', 'price as car_price')->get();
 
 // add another column in select at later stage
+<<<<<<< HEAD
 $cars_with_mileage = $car->addSelect('mileage')->get(); 
+=======
+$cars_with_mileage = $car->addSelect('mileage')->get();
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 ```
 
 **Select distinct record:**
@@ -3732,12 +3858,20 @@ Car::orderBy('published_at', 'desc')
 ```php
 $cars = Car::latest()->get();
 
+<<<<<<< HEAD
 // The same as 
+=======
+// The same as
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 $cars = Car::orderBy('created_at', 'desc')->get();
 
 $cars = Car::oldest()->get();
 
+<<<<<<< HEAD
 // The same as 
+=======
+// The same as
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 $cars = Car::orderBy('created_at', 'asc')->get();
 
 // select data in rendom order
@@ -3784,7 +3918,11 @@ select * from 'cities' where 'cities'.'id' = 15 limit 1
 select * from 'cities' where 'cities'.'id' = 21 limit 1
 select * from 'cities' where 'cities'.'id' = 17 limit 1
 select * from 'cities' where 'cities'.'id' = 24 limit 1
+<<<<<<< HEAD
 select * from 'cities' where 'cities'.'id' = 15 limit 1 
+=======
+select * from 'cities' where 'cities'.'id' = 15 limit 1
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 ```
 
 ```php
@@ -3852,7 +3990,11 @@ foreach($cars as $car){
 select * from 'cars' where 'cars'.'deleted_at' is null limit 5
 
 select * from cities where 'cities'.'id' = 15 limit 1 -- it fetch cities, all though I don't need it
+<<<<<<< HEAD
 select * from states where 'states'.'id' = 3 limit 1 
+=======
+select * from states where 'states'.'id' = 3 limit 1
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 -- so on
 ```
 
@@ -3913,10 +4055,17 @@ public function search()
         ->where('published_at', '<', now())
         ->orderBy('published_at', 'desc');
 
+<<<<<<< HEAD
     $states = $query->join('cities', 'cities_id', '=', 'cars.city_id'); 
 
     // filter the data
     $res = $states->where('city.state_id', 1) 
+=======
+    $states = $query->join('cities', 'cities_id', '=', 'cars.city_id');
+
+    // filter the data
+    $res = $states->where('city.state_id', 1)
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
 
     return view('car.search', compact('cars', 'carCount'));
 }
@@ -3925,8 +4074,13 @@ public function search()
 _Use join for optimization:_
 
 ```php
+<<<<<<< HEAD
 // here you doing query for city 
 $query = Car::with(['primaryImage', 'city', 'maker', 'model', 'carType', 'fuelType']) 
+=======
+// here you doing query for city
+$query = Car::with(['primaryImage', 'city', 'maker', 'model', 'carType', 'fuelType'])
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
     ->where('published_at', '<', now())
     ->orderBy('published_at', 'desc');
 
@@ -4071,7 +4225,11 @@ $cars = Car::whereIn('users_id', $users)->get();
 ->whereColumn('updated_at', '>', 'created_at')
 
 ->whereColumn([
+<<<<<<< HEAD
     ['column1', '=', 'column2'], 
+=======
+    ['column1', '=', 'column2'],
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
     ['updated_at', '>', 'created_at'],
 ])
 ```
@@ -4081,13 +4239,21 @@ $cars = Car::whereIn('users_id', $users)->get();
 ```php
 $patients = DB::table('patients')
 ->whereBetweenColumns(
+<<<<<<< HEAD
     'weight', 
+=======
+    'weight',
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
     ['minimum_allowed_weight', 'maximum_allowed_weight']
 )->get();
 
 $patients = DB::table('patients')
 ->whereNotbetweenColumns(
+<<<<<<< HEAD
     'weight', 
+=======
+    'weight',
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
     ['minimum_allowed_weight', 'maximum_aloowedweight']
     ->get()[]
 )
@@ -4109,7 +4275,11 @@ Car::where('year', '>=', 2010)
 /* Generated SQL:
     select * from `cars`
     where `year` >= 2010
+<<<<<<< HEAD
     and `price` > 10000 
+=======
+    and `price` > 10000
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
     or `price` < 5000
 */
 
@@ -4223,6 +4393,7 @@ Car::where('price', '>', 10000)->ddRawSql();
 $cars = $query->paginate(15);
 ```
 
+<<<<<<< HEAD
 _Render Pagination:_
 
 ```php
@@ -4460,3 +4631,102 @@ public function index()
     return redirect()->away('https://laravel.com');
 }
 ```
+=======
+_Several way to customise pagination:_
+
+- Giving view name directly
+
+```php
+{{ $cars->onEachSide(1)->links('pagination') }}
+```
+
+- Using App provider
+
+```php
+public function boot(): void
+{
+    Paginator::defaultView(view: 'pagination');
+}
+```
+
+- Customizing exisiting tailwind css view
+
+```bash
+php artisan vendor:publish --tag=laravel-pagination
+```
+
+👆 it will publish [laravel-pagination] assets to `view/resource/vendor/pagination`
+
+By default use `tailwind.blade.php`
+
+Pagination logic:
+
+```php
+<?php
+/** @var $paginator \Illuminate\Pagination\LengthAwarePaginator */
+?>
+
+@if ($paginator->hasPages())
+    <nav class="pagination my-large">
+
+        {{-- Previous Button Logic --}}
+        @if ($paginator->onFirstPage())
+            <span class="pagination-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                    style="width: 18px">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                </svg>
+            </span>
+        @else
+            <a href="{{ $paginator->previousPageUrl() }}" class="pagination-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                    style="width: 18px">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                </svg>
+            </a>
+        @endif
+
+        {{-- Page Numbers Logic --}}
+        @foreach ($elements as $element)
+            @if (is_string($element))
+                <span class="pagination-item">{{ $element }}</span>
+            @endif
+
+            @if (is_array($element))
+                @foreach ($element as $page => $url)
+                    @if ($page == $paginator->currentPage())
+                        <span class="pagination-item active">{{ $page }}</span>
+                    @else
+                        <a href="{{ $url }}" class="pagination-item">{{ $page }}</a>
+                    @endif
+                @endforeach
+            @endif
+        @endforeach
+
+        {{-- Next Button Logic --}}
+        @if ($paginator->hasMorePages())
+            <a href="{{ $paginator->nextPageUrl() }}" class="pagination-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                    style="width: 18px">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+            </a>
+        @else
+            <span class="pagination-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                    style="width: 18px">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+            </span>
+        @endif
+
+    </nav>
+@endif
+```
+
+### session
+
+session()->push('ideas');
+session()->get('ideas');
+session()->forgot('ideas');
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885

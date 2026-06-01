@@ -4,8 +4,12 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+<<<<<<< HEAD
 return new class extends Migration
 {
+=======
+return new class extends Migration {
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
     /**
      * Run the migrations.
      */

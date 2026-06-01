@@ -19,6 +19,7 @@
                                 @forelse ($cars as $car)
                                     <tr>
                                         <td>
+<<<<<<< HEAD
                                             <img src="{{ $car->primaryImage?->image_path }}" alt="car-image"
                                                 class="my-cars-img-thumbnail" />
                                         </td>
@@ -27,6 +28,15 @@
                                         <td>{{ $car->getCreateDate() }}</td>
                                         <td>{{ $car->published_at ? 'Yes' : 'No' }}</td>
                                         <td>
+=======
+                                            <img src="{{ $car->primaryImage?->image_path }}" alt=""
+                                                class="my-cars-img-thumbnail" />
+                                        </td>
+                                        <td>{{ $car->year }} | {{ $car->model->name }} | {{ $car->maker->name }}</td>
+                                        <td>{{ $car->getCreateDate() }}</td>
+                                        <td>{{ $car->published_at ? 'Yes' : 'No' }}</td>
+                                        <td class="">
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
                                             <a href="{{ route('car.edit', $car) }}"
                                                 class="btn btn-edit inline-flex items-center">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -35,6 +45,10 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                                                 </svg>
+<<<<<<< HEAD
+=======
+
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
                                                 edit
                                             </a>
                                             <a href="car_images.html" class="btn btn-edit inline-flex items-center">
@@ -69,7 +83,44 @@
                             </tbody>
                         </table>
                     </div>
+<<<<<<< HEAD
                     {{ $cars->onEachSide(1)->links('pagination') }}
+=======
+
+                    <nav class="pagination my-large">
+                        <a href="#" class="pagination-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor" style="width: 18px">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5" />
+                            </svg>
+                        </a>
+                        <a href="#" class="pagination-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor" style="width: 18px">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                            </svg>
+                        </a>
+
+                        <a href="#" class="pagination-item"> 1 </a>
+                        <a href="#" class="pagination-item"> 2 </a>
+                        <span class="pagination-item active"> 3 </span>
+                        <a href="#" class="pagination-item"> 4 </a>
+                        <a href="#" class="pagination-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor" style="width: 18px">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                            </svg>
+                        </a>
+                        <a href="#" class="pagination-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor" style="width: 18px">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                            </svg>
+                        </a>
+                    </nav>
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
                 </div>
             </div>
         </div>

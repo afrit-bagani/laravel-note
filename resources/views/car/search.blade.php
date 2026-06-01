@@ -52,4 +52,8 @@
         </section>
         <!--/ Found Cars -->
     </main>
+<<<<<<< HEAD
 </x-app-layout>
+=======
+</x-app-layout>
+>>>>>>> b830e961970d6d87bdc2075ff9292f3fa69b8885
